@@ -1,0 +1,7 @@
+.ipynb_checkpoints/
+.vscode/
+jupyter_keras/__pycache__/
+jupyter_keras/.ipynb_checkpoints/
+lib/
+node_modules/
+package-lock.json
