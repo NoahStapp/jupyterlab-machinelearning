@@ -1,5 +1,5 @@
 {
-  "name": "@jupyterlab/modelinfo",
+  "name": "@jupyterlab/machinelearning",
   "version": "0.0.1",
   "description": "A JupyterLab extension for inspecting machine learning algorithms",
   "keywords": [
@@ -25,6 +25,7 @@
     "@jupyterlab/application": "^0.17.2",
     "@jupyterlab/mainmenu": "^0.6.2",
     "@jupyterlab/notebook": "^0.17.2",
+    "typestyle": "^2.0.1",
     "vega": "^4.2.0",
     "vega-embed": "^3.18.2",
     "vega-lite": "^3.0.0-rc0"

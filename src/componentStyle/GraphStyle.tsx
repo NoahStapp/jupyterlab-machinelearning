@@ -6,8 +6,23 @@ export const GraphContainerStyle = style({
 })
 
 export const LabelStyle = style({
+    display: 'flex',
     width: '100%',
-    textAlign: 'center'
+    boxSizing: 'border-box',
+    paddingLeft: '10%',
+
+    $nest: {
+        '& .stat': {
+            width: '45px',
+            lineHeight: '20px',
+            textAlign: 'right'
+        },
+
+        '& .current-avg': {
+            lineHeight: '20px',
+            paddingLeft: '12px'
+        }
+    }
 })
 
 export const BigLabelStyle = style({

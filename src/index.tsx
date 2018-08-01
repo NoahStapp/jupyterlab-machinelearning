@@ -104,8 +104,8 @@ interface ModelViewPanelProps {
 }
 
 interface ModelViewPanelState {
-  totalProgress: number;
-  currentProgress: number;
+  overallComplete: number;
+  epochComplete: number;
   modelAccuracy: number;
   modelLoss: number;
   lossData: Object[];
@@ -119,8 +119,8 @@ class ModelViewPanel extends React.Component<
   ModelViewPanelState
 > {
   state = {
-    totalProgress: 0,
-    currentProgress: 0,
+    overallComplete: 0,
+    epochComplete: 0,
     modelAccuracy: 0,
     modelLoss: 0,
     lossData: null,
@@ -134,7 +134,7 @@ class ModelViewPanel extends React.Component<
       comm.onMsg = msg => {
         comm.send(msg.content.data); // echo
         this.setState({
-          totalProgress: Number(
+          overallComplete: Number(
             parseFloat(msg.content.data['overall'].toString()).toFixed(2)
           ),
           modelLoss: Number(
@@ -143,7 +143,7 @@ class ModelViewPanel extends React.Component<
           modelAccuracy: Number(
             parseFloat(msg.content.data['accuracy'].toString()).toFixed(2)
           ),
-          currentProgress: Number(
+          epochComplete: Number(
             parseFloat(msg.content.data['current'].toString()).toFixed(2)
           ),
           oldLossData: this.state.lossData,
@@ -168,6 +168,8 @@ class ModelViewPanel extends React.Component<
         modelLoss={this.state.modelLoss}
         done={this.state.done}
         runTime={10000}
+        overallComplete={this.state.overallComplete}
+        epochComplete={this.state.epochComplete}
       />
     );
   }

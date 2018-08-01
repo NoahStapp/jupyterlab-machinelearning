@@ -13,8 +13,10 @@ export class Graph extends React.Component<IGraphProps, {}> {
     return(
       <div className={GraphContainerStyle}>
           <div className={LabelStyle}>
-            <span className={BigLabelStyle}>{'Model ' + this.props.statName + ': '}</span>
-            <span>{(this.props.done ? 'Average ' : 'Current ') + this.props.stat + '%'}</span>
+            <div className={BigLabelStyle}>{'Model ' + this.props.statName + ': '}</div>
+            <div className='current-avg'>{(this.props.done ? 'Average ' : 'Current ')}</div>
+            <div className='stat'>{this.props.stat}</div>
+            <div>{'%'}</div>
           </div>
           <div className={GraphStyle}>
             {this.props.graph}
