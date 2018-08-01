@@ -15,7 +15,7 @@ export class Graph extends React.Component<IGraphProps, {}> {
           <div className={LabelStyle}>
             <div className={BigLabelStyle}>{'Model ' + this.props.statName + ': '}</div>
             <div className='current-avg'>{(this.props.done ? 'Average ' : 'Current ')}</div>
-            <div className='stat'>{this.props.stat}</div>
+            <div className='stat'>{Math.round(this.props.stat*10000)/100}</div>
             <div>{'%'}</div>
           </div>
           <div className={GraphStyle}>
