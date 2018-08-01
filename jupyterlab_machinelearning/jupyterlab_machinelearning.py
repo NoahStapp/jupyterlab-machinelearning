@@ -100,7 +100,7 @@ class TrainingInfoCallback(Callback):
             "lossData": self.loss_data,
             "accuracyData": self.accuracy_data,
         }
-        my_comm = Comm(target_name="test", data=data)
+        my_comm = Comm(target_name="jupyterlab-machinelearning", data=data)
         my_comm.send(data=data)
 
     """
@@ -112,7 +112,7 @@ class TrainingInfoCallback(Callback):
             "loss": (sum(self.total_losses) / float(len(self.total_losses))),
             "accuracy": (sum(self.total_accuracy) / float(len(self.total_accuracy))),
         }
-        my_comm = Comm(target_name="test", data=data)
+        my_comm = Comm(target_name="jupyterlab-machinelearning", data=data)
         my_comm.send(data=data)
 
     def on_msg(comm, msg):
