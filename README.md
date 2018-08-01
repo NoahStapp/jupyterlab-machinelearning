@@ -1,6 +1,6 @@
 # jupyterlab-machinelearning
 
-A JupyterLab extension for machine-learning tools
+A JupyterLab extension for machine learning tools
 
 ## Prerequisites
 
