@@ -54,8 +54,20 @@ interface ModelViewPanelState {
   currentProgress: number;
   loss: number;
   accuracy: number;
-  lossData: Object[];
-  oldLossData: Object[];
+  lossData: LossData[];
+  oldLossData: LossData[];
+  accuracyData: AccuracyData[];
+  oldAccuracyData: AccuracyData[];
+}
+
+interface LossData {
+  samples: number;
+  loss: number;
+}
+
+interface AccuracyData {
+  samples: number;
+  accuracy: number;
 }
 
 class ModelViewPanel extends React.Component<
@@ -68,17 +80,26 @@ class ModelViewPanel extends React.Component<
     loss: 0,
     accuracy: 0,
     lossData: null,
-    oldLossData: null
+    oldLossData: null,
+    accuracyData: null,
+    oldAccuracyData: null
   };
 
   constructor(props: any) {
     super(props);
     this.props.kernel.registerCommTarget('test', (comm, msg) => {
       comm.onMsg = msg => {
-        comm.send(msg.content.data); // echo
+        console.log(msg.content.data)
         this.setState({
           totalProgress: Number(
-            parseFloat(msg.content.data['overall'].toString()).toFixed(2)
+            parseFloat(msg.content.data['totalProgress'].toString()).toFixed(
+              2
+            )
+          ),
+          currentProgress: Number(
+            parseFloat(msg.content.data['currentProgress'].toString()).toFixed(
+              2
+            )
           ),
           loss: Number(
             parseFloat(msg.content.data['loss'].toString()).toFixed(2)
@@ -86,15 +107,11 @@ class ModelViewPanel extends React.Component<
           accuracy: Number(
             parseFloat(msg.content.data['accuracy'].toString()).toFixed(2)
           ),
-          currentProgress: Number(
-            parseFloat(msg.content.data['current'].toString()).toFixed(2)
-          ),
           oldLossData: this.state.lossData,
-          lossData: msg.content.data['loss_data']
+          lossData: msg.content.data['lossData'],
+          oldAccuracyData: this.state.accuracyData,
+          accuracyData: msg.content.data['accuracyData']
         });
-      };
-      comm.onClose = msg => {
-        console.log(msg);
       };
     });
   }
@@ -112,6 +129,20 @@ class ModelViewPanel extends React.Component<
     //     y: { field: 'loss', type: 'quantitative' }
     //   }
     // };
+
+    // let accuracyGraphSpec: Spec = {
+    //   $schema: 'https://vega.github.io/schema/vega-lite/v2.json',
+    //   data: {
+    //     name: 'accuracyData'
+    //   },
+    //   width: 400,
+    //   mark: 'line',
+    //   encoding: {
+    //     x: { field: 'samples', type: 'quantitative' },
+    //     y: { field: 'accuracy', type: 'quantitative' }
+    //   }
+    // };
+
     // if (this.state.lossData !== null) {
     //   VegaEmbed('#lossGraph', lossGraphSpec).then(res => {
     //     res.view
@@ -121,6 +152,17 @@ class ModelViewPanel extends React.Component<
     //           .changeset()
     //           .insert(this.state.lossData)
     //           .remove(this.state.oldLossData)
+    //       )
+    //       .run();
+    //   });
+    //   VegaEmbed('#accuracyGraph', lossGraphSpec).then(res => {
+    //     res.view
+    //       .change(
+    //         'accuracyData',
+    //         vega
+    //           .changeset()
+    //           .insert(this.state.accuracyData)
+    //           .remove(this.state.oldAccuracyData)
     //       )
     //       .run();
     //   });
@@ -134,6 +176,7 @@ class ModelViewPanel extends React.Component<
         <div>{'Accuracy: ' + this.state.accuracy + '%'}</div>
 
         <div id="lossGraph" />
+        <div id="accuracyGraph" />
       </div>
     );
   }
