@@ -13,7 +13,7 @@ export const LabelStyle = style({
 
     $nest: {
         '& .stat': {
-            width: '45px',
+            width: '50px',
             lineHeight: '20px',
             textAlign: 'right'
         },

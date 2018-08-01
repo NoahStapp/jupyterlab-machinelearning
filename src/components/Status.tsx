@@ -84,11 +84,11 @@ export class Accuracy extends React.Component<IAccuracyProps, {}> {
         return(
             <div className={AccuracyStyle}>
                 <div className='contain contain-first'>
-                    <div className='stat'>{Math.round(this.props.modelAccuracy)}</div>
+                    <div className='stat'>{Math.round(this.props.modelAccuracy*100)}</div>
                     <div>{"% acc."}</div>
                 </div>
                 <div className='contain'>
-                    <div className='stat'>{Math.round(this.props.modelLoss)}</div>
+                    <div className='stat'>{Math.round(this.props.modelLoss*100)}</div>
                     <div>{"% loss"}</div>
                 </div>
             </div>
