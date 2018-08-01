@@ -2,6 +2,8 @@ import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 import { ICommandPalette, ReactElementWidget } from '@jupyterlab/apputils';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { Kernel } from '@jupyterlab/services';
+// import VegaEmbed from 'vega-embed';
+// import * as vega from 'vega';
 import * as React from 'react';
 
 const extension: JupyterLabPlugin<void> = {
@@ -49,6 +51,10 @@ interface ModelViewPanelProps {
 interface ModelViewPanelState {
   totalProgress: number;
   currentProgress: number;
+  loss: number;
+  accuracy: number;
+  lossData: Object[];
+  oldLossData: Object[];
 }
 
 class ModelViewPanel extends React.Component<
@@ -57,7 +63,11 @@ class ModelViewPanel extends React.Component<
 > {
   state = {
     totalProgress: 0,
-    currentProgress: 0
+    currentProgress: 0,
+    loss: 0,
+    accuracy: 0,
+    lossData: null,
+    oldLossData: null
   };
 
   constructor(props: any) {
@@ -69,24 +79,57 @@ class ModelViewPanel extends React.Component<
           totalProgress: Number(
             parseFloat(msg.content.data['overall'].toString()).toFixed(2)
           ),
+          loss: Number(
+            parseFloat(msg.content.data['loss'].toString()).toFixed(2)
+          ),
+          accuracy: Number(
+            parseFloat(msg.content.data['accuracy'].toString()).toFixed(2)
+          ),
           currentProgress: Number(
             parseFloat(msg.content.data['current'].toString()).toFixed(2)
-          )
+          ),
+          oldLossData: this.state.lossData,
+          lossData: msg.content.data['loss_data']
         });
       };
       comm.onClose = msg => {
-        console.log(msg); // 'bye'
+        console.log(msg);
       };
     });
   }
 
   render() {
-    console.log('rendering model view panel with kernel', this.props.kernel);
+    // let lossGraphSpec = {
+    //   $schema: 'https://vega.github.io/schema/vega-lite/v2.json',
+    //   data: {name: 'lossData'},
+    //   width: 400,
+    //   mark: 'line',
+    //   encoding: {
+    //     x: { field: 'samples', type: 'quantitative' },
+    //     y: { field: 'loss', type: 'quantitative' }
+    //   }
+    // };
+    // if (this.state.lossData !== null) {
+    //   VegaEmbed('#lossGraph', lossGraphSpec).then(res => {
+    //     res.view.change(
+    //       'lossData',
+    //       vega
+    //         .changeset()
+    //         .insert(this.state.lossData)
+    //         .remove(this.state.oldLossData)
+    //     )
+    //     .run();
+    //   });
+    // }
 
     return (
       <div>
         <div>{'Total: ' + this.state.totalProgress + '%'}</div>
         <div>{'Current: ' + this.state.currentProgress + '%'}</div>
+        <div>{'Loss: ' + this.state.loss + '%'}</div>
+        <div>{'Accuracy: ' + this.state.accuracy + '%'}</div>
+
+        <div id="lossGraph" />
       </div>
     );
   }

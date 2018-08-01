@@ -4,6 +4,7 @@
         "noImplicitAny": false,
         "noEmitOnError": true,
         "noUnusedLocals": true,
+        "allowSyntheticDefaultImports": true,
         "module": "commonjs",
         "moduleResolution": "node",
         "target": "es2015",
@@ -12,5 +13,5 @@
         "types": [],
         "jsx": "react"
   },
-  "include": ["src/*"]
+  "include": ["src/*", "node_modules/vega-lite/typings/*.d.ts"]
 }
