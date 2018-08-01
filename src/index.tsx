@@ -104,6 +104,7 @@ interface ModelViewPanelProps {
 interface ModelViewPanelState {
   totalProgress: number;
   currentProgress: number;
+  runTime: number;
   loss: number;
   accuracy: number;
   lossData: LossData[];
@@ -136,6 +137,7 @@ class ModelViewPanel extends React.Component<
   state = {
     totalProgress: 0,
     currentProgress: 0,
+    runTime: 0,
     loss: 0,
     accuracy: 0,
     lossData: [],
@@ -157,6 +159,9 @@ class ModelViewPanel extends React.Component<
               2
             )
           ),
+          runTime: Number(
+            parseInt(msg.content.data['runTime'].toString())
+          ),
           loss: Number(
             parseFloat(msg.content.data['loss'].toString()).toFixed(4)
           ),
@@ -175,6 +180,9 @@ class ModelViewPanel extends React.Component<
       comm.onMsg = msg => {
         // console.log(msg.content.data);
         this.setState({
+          runTime: Number(
+            parseFloat(msg.content.data['runTime'].toString()).toFixed(2)
+          ),
           loss: Number(
             parseFloat(msg.content.data['totalLoss'].toString()).toFixed(2)
           ),
@@ -184,6 +192,14 @@ class ModelViewPanel extends React.Component<
         });
       };
     });
+  }
+
+  getFormattedRuntime() {
+    let hours = Math.floor(this.state.runTime / 3600);
+    let minutes = Math.floor((this.state.runTime - hours * 3600) / 60);
+    let seconds = Math.floor(this.state.runTime - hours * 3600 - minutes * 60);
+
+    return hours + ':' + minutes + ':' + seconds;
   }
 
   render() {
@@ -215,6 +231,7 @@ class ModelViewPanel extends React.Component<
       <div>
         <div>{'Total: ' + this.state.totalProgress + '%'}</div>
         <div>{'Current: ' + this.state.currentProgress + '%'}</div>
+        <div>{'Runtime: ' + this.getFormattedRuntime()}</div>
         <div>{'Loss: ' + this.state.loss}</div>
         <div>{'Accuracy: ' + this.state.accuracy}</div>
 

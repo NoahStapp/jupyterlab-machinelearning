@@ -5,6 +5,7 @@ from keras.datasets import mnist
 from keras.callbacks import Callback
 from keras.callbacks import ProgbarLogger
 from ipykernel.comm import Comm
+from time import time
 
 
 class TrainingInfoCallback(Callback):
@@ -18,6 +19,9 @@ class TrainingInfoCallback(Callback):
         :param total_progress: progress of training for all epochs
         :param epoch_progress: progress of training in current epoch
         :param mode: track if model is using samples (0) or steps (1)
+        :param loss_data: the current batch's loss and sample amount
+        :param accuracy_data: the current batch's accuracy and sample amount
+        :param total_runtime: the total runtime for training
     """
 
     def __init__(self):
@@ -32,6 +36,8 @@ class TrainingInfoCallback(Callback):
         self.mode = 0
         self.loss_data = {}
         self.accuracy_data = {}
+        self.total_runtime = 0
+        self.starttime = time()
 
     """
         Get number of samples/steps per epoch and total number of epochs
@@ -47,7 +53,6 @@ class TrainingInfoCallback(Callback):
             self.mode = 1
 
         self.epochs = self.params["epochs"]
-
     """
         Output total loss and accuracy statistics
     """
@@ -82,6 +87,7 @@ class TrainingInfoCallback(Callback):
         self.accuracy_data = {"samples": self.total_progress, "accuracy": self.accuracy}
         self.total_accuracy.append(logs.get("acc"))
         self.display_progress()
+        self.total_runtime = time() - self.starttime
 
     """
         Send statistics and datasets to frontend 
@@ -92,6 +98,7 @@ class TrainingInfoCallback(Callback):
             "totalProgress": (self.total_progress / (self.sample_amount * self.epochs))
             * 100,
             "currentProgress": (self.current_progress / self.sample_amount) * 100,
+            "runTime": self.total_runtime,
             "loss": self.loss,
             "accuracy": self.accuracy,
             "lossData": self.loss_data,
@@ -106,6 +113,7 @@ class TrainingInfoCallback(Callback):
 
     def display_statistics(self):
         data = {
+            "runTime": self.total_runtime,
             "totalLoss": (sum(self.total_losses) / float(len(self.total_losses))),
             "totalAccuracy": (
                 sum(self.total_accuracy) / float(len(self.total_accuracy))
