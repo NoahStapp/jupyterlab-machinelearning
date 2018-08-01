@@ -2,17 +2,18 @@ import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 import { ICommandPalette, ReactElementWidget } from '@jupyterlab/apputils';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { Kernel } from '@jupyterlab/services';
+import { ModelViewer } from './components/ModelViewer'
 import * as React from 'react';
 
 const extension: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/jupyterlab-modelview',
+  id: '@jupyterlab/jupyterlab-machinelearning',
   requires: [ICommandPalette, INotebookTracker],
   activate: (
     app: JupyterLab,
     palette: ICommandPalette,
     tracker: INotebookTracker
   ): void => {
-    const command: string = 'modelview:open-new';
+    const command: string = 'machinelearning:open-new';
     app.commands.addCommand(command, {
       label: 'New Model Viewer',
       execute: () => {
@@ -20,8 +21,8 @@ const extension: JupyterLabPlugin<void> = {
           .kernel! as Kernel.IKernel;
 
         const widget = new ModelView(kernel);
-        widget.id = 'modelviewer';
-        widget.title.label = 'Model Viewer';
+        widget.id = 'machinelearning';
+        widget.title.label = 'Machine Learning';
         widget.title.closable = true;
 
         if (!widget.isAttached) {
@@ -84,10 +85,12 @@ class ModelViewPanel extends React.Component<
     console.log('rendering model view panel with kernel', this.props.kernel);
 
     return (
-      <div>
-        <div>{'Total: ' + this.state.totalProgress + '%'}</div>
-        <div>{'Current: ' + this.state.currentProgress + '%'}</div>
-      </div>
+      <ModelViewer 
+        modelAccuracy={0}
+        modelLoss={0}
+        done={true}
+        runTime={10000}
+      />
     );
   }
 }
