@@ -4,7 +4,7 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 import { Kernel } from '@jupyterlab/services';
 // import VegaEmbed from 'vega-embed';
 // import * as vega from 'vega';
-import { TopLevelSpec as Spec } from 'vega-lite';
+// import { TopLevelSpec as Spec } from 'vega-lite';
 import * as React from 'react';
 
 /**
@@ -19,32 +19,32 @@ const extension: JupyterLabPlugin<void> = {
     tracker: INotebookTracker
   ): void => {
     /** Vega-Lite spec for training loss graph */
-    let lossGraphSpec: Spec = {
-      $schema: 'https://vega.github.io/schema/vega-lite/v2.json',
-      data: {
-        name: 'lossData'
-      },
-      width: 400,
-      mark: 'line',
-      encoding: {
-        x: { field: 'samples', type: 'quantitative' },
-        y: { field: 'loss', type: 'quantitative' }
-      }
-    };
+    // let lossGraphSpec: Spec = {
+    //   $schema: 'https://vega.github.io/schema/vega-lite/v2.json',
+    //   data: {
+    //     name: 'lossData'
+    //   },
+    //   width: 400,
+    //   mark: 'line',
+    //   encoding: {
+    //     x: { field: 'samples', type: 'quantitative' },
+    //     y: { field: 'loss', type: 'quantitative' }
+    //   }
+    // };
 
-    /** Vega-Lite spec for training accuracy graph */
-    let accuracyGraphSpec: Spec = {
-      $schema: 'https://vega.github.io/schema/vega-lite/v2.json',
-      data: {
-        name: 'accuracyData'
-      },
-      width: 400,
-      mark: 'line',
-      encoding: {
-        x: { field: 'samples', type: 'quantitative' },
-        y: { field: 'accuracy', type: 'quantitative' }
-      }
-    };
+    // /** Vega-Lite spec for training accuracy graph */
+    // let accuracyGraphSpec: Spec = {
+    //   $schema: 'https://vega.github.io/schema/vega-lite/v2.json',
+    //   data: {
+    //     name: 'accuracyData'
+    //   },
+    //   width: 400,
+    //   mark: 'line',
+    //   encoding: {
+    //     x: { field: 'samples', type: 'quantitative' },
+    //     y: { field: 'accuracy', type: 'quantitative' }
+    //   }
+    // };
 
     /** Add command to open machine learning panel */
     const command: string = 'modelview:open-new';
@@ -53,7 +53,7 @@ const extension: JupyterLabPlugin<void> = {
       execute: () => {
         let kernel: Kernel.IKernel = tracker.currentWidget.context.session
           .kernel! as Kernel.IKernel;
-        const widget = new ModelView(kernel, lossGraphSpec, accuracyGraphSpec);
+        const widget = new ModelView(kernel, null, null);
         widget.id = 'modelviewer';
         widget.title.label = 'Model Viewer';
         widget.title.closable = true;
@@ -76,8 +76,8 @@ const extension: JupyterLabPlugin<void> = {
 class ModelView extends ReactElementWidget {
   constructor(
     kernel: Kernel.IKernel,
-    lossGraphSpec: Spec,
-    accuracyGraphSpec: Spec
+    lossGraphSpec: any,
+    accuracyGraphSpec: any
   ) {
     super(
       <ModelViewPanel
@@ -94,8 +94,8 @@ class ModelView extends ReactElementWidget {
  */
 interface ModelViewPanelProps {
   kernel: Kernel.IKernel;
-  lossGraphSpec: Spec;
-  accuracyGraphSpec: Spec;
+  lossGraphSpec: any;
+  accuracyGraphSpec: any;
 }
 
 /**
@@ -107,9 +107,7 @@ interface ModelViewPanelState {
   loss: number;
   accuracy: number;
   lossData: LossData[];
-  oldLossData: LossData[];
   accuracyData: AccuracyData[];
-  oldAccuracyData: AccuracyData[];
 }
 
 /**
@@ -140,45 +138,52 @@ class ModelViewPanel extends React.Component<
     currentProgress: 0,
     loss: 0,
     accuracy: 0,
-    lossData: null,
-    oldLossData: null,
-    accuracyData: null,
-    oldAccuracyData: null
+    lossData: [],
+    accuracyData: []
   };
 
   constructor(props: any) {
     super(props);
     /** Register a custom comm with the backend package */
-    this.props.kernel.registerCommTarget(
-      'jupyterlab-machinelearning',
-      (comm, msg) => {
-        comm.onMsg = msg => {
-          console.log(msg.content.data);
-          this.setState({
-            totalProgress: Number(
-              parseFloat(msg.content.data['totalProgress'].toString()).toFixed(
-                2
-              )
-            ),
-            currentProgress: Number(
-              parseFloat(
-                msg.content.data['currentProgress'].toString()
-              ).toFixed(2)
-            ),
-            loss: Number(
-              parseFloat(msg.content.data['loss'].toString()).toFixed(2)
-            ),
-            accuracy: Number(
-              parseFloat(msg.content.data['accuracy'].toString()).toFixed(2)
-            ),
-            oldLossData: this.state.lossData,
-            lossData: msg.content.data['lossData'],
-            oldAccuracyData: this.state.accuracyData,
-            accuracyData: msg.content.data['accuracyData']
-          });
-        };
-      }
-    );
+    this.props.kernel.registerCommTarget('batchData', (comm, msg) => {
+      comm.onMsg = msg => {
+        // console.log(msg.content.data);
+        this.setState(prevState => ({
+          totalProgress: Number(
+            parseFloat(msg.content.data['totalProgress'].toString()).toFixed(2)
+          ),
+          currentProgress: Number(
+            parseFloat(msg.content.data['currentProgress'].toString()).toFixed(
+              2
+            )
+          ),
+          loss: Number(
+            parseFloat(msg.content.data['loss'].toString()).toFixed(4)
+          ),
+          accuracy: Number(
+            parseFloat(msg.content.data['accuracy'].toString()).toFixed(4)
+          ),
+          lossData: [...prevState.lossData, msg.content.data['lossData']],
+          accuracyData: [
+            ...prevState.accuracyData,
+            msg.content.data['accuracyData']
+          ]
+        }));
+      };
+    });
+    this.props.kernel.registerCommTarget('totalData', (comm, msg) => {
+      comm.onMsg = msg => {
+        // console.log(msg.content.data);
+        this.setState({
+          loss: Number(
+            parseFloat(msg.content.data['totalLoss'].toString()).toFixed(2)
+          ),
+          accuracy: Number(
+            parseFloat(msg.content.data['totalAccuracy'].toString()).toFixed(2)
+          )
+        });
+      };
+    });
   }
 
   render() {
@@ -190,8 +195,7 @@ class ModelViewPanel extends React.Component<
     //         'lossData',
     //         vega
     //           .changeset()
-    //           .insert(this.state.lossData)
-    //           .remove(this.state.oldLossData)
+    //           .insert(this.state.lossData[this.state.lossData.length - 1])
     //       )
     //       .run();
     //   });
@@ -201,8 +205,7 @@ class ModelViewPanel extends React.Component<
     //         'accuracyData',
     //         vega
     //           .changeset()
-    //           .insert(this.state.accuracyData)
-    //           .remove(this.state.oldAccuracyData)
+    //           .insert(this.state.accuracyData[this.state.accuracyData.length - 1])
     //       )
     //       .run();
     //   });
@@ -212,8 +215,8 @@ class ModelViewPanel extends React.Component<
       <div>
         <div>{'Total: ' + this.state.totalProgress + '%'}</div>
         <div>{'Current: ' + this.state.currentProgress + '%'}</div>
-        <div>{'Loss: ' + this.state.loss + '%'}</div>
-        <div>{'Accuracy: ' + this.state.accuracy + '%'}</div>
+        <div>{'Loss: ' + this.state.loss}</div>
+        <div>{'Accuracy: ' + this.state.accuracy}</div>
 
         <div id="lossGraph" />
         <div id="accuracyGraph" />

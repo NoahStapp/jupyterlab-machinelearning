@@ -30,8 +30,8 @@ class TrainingInfoCallback(Callback):
         self.total_progress = 0
         self.current_progress = 0
         self.mode = 0
-        self.loss_data = []
-        self.accuracy_data = []
+        self.loss_data = {}
+        self.accuracy_data = {}
 
     """
         Get number of samples/steps per epoch and total number of epochs
@@ -77,11 +77,9 @@ class TrainingInfoCallback(Callback):
             self.total_progress += 1
         self.loss = logs.get("loss")
         self.total_losses.append(logs.get("loss"))
-        self.loss_data.append({"samples": self.total_progress, "loss": self.loss})
+        self.loss_data = {"samples": self.total_progress, "loss": self.loss}
         self.accuracy = logs.get("acc")
-        self.accuracy_data.append(
-            {"samples": self.total_progress, "accuracy": self.accuracy}
-        )
+        self.accuracy_data = {"samples": self.total_progress, "accuracy": self.accuracy}
         self.total_accuracy.append(logs.get("acc"))
         self.display_progress()
 
@@ -91,16 +89,15 @@ class TrainingInfoCallback(Callback):
 
     def display_progress(self):
         data = {
-            "totalProgress": (
-                (self.total_progress / (self.sample_amount * self.epochs)) * 100
-            ),
+            "totalProgress": (self.total_progress / (self.sample_amount * self.epochs))
+            * 100,
             "currentProgress": (self.current_progress / self.sample_amount) * 100,
-            "loss": self.loss * 100,
-            "accuracy": self.accuracy * 100,
+            "loss": self.loss,
+            "accuracy": self.accuracy,
             "lossData": self.loss_data,
             "accuracyData": self.accuracy_data,
         }
-        my_comm = Comm(target_name="jupyterlab-machinelearning", data=data)
+        my_comm = Comm(target_name="batchData", data=data)
         my_comm.send(data=data)
 
     """
@@ -109,10 +106,12 @@ class TrainingInfoCallback(Callback):
 
     def display_statistics(self):
         data = {
-            "loss": (sum(self.total_losses) / float(len(self.total_losses))),
-            "accuracy": (sum(self.total_accuracy) / float(len(self.total_accuracy))),
+            "totalLoss": (sum(self.total_losses) / float(len(self.total_losses))),
+            "totalAccuracy": (
+                sum(self.total_accuracy) / float(len(self.total_accuracy))
+            ),
         }
-        my_comm = Comm(target_name="jupyterlab-machinelearning", data=data)
+        my_comm = Comm(target_name="totalData", data=data)
         my_comm.send(data=data)
 
     def on_msg(comm, msg):
