@@ -1,5 +1,9 @@
 import { style } from 'typestyle'
 
+export const WidgetStyle = style({
+    backgroundColor: 'var(--jp-layout-color0)'
+})
+
 export const ModelViewerStyle = style({
     display: 'flex',
     flexWrap: 'wrap',
@@ -48,4 +52,9 @@ export const RunTimeStyle = style({
     fontSize: 'var(--jp-content-font-size2)',
     textAlign: 'center',
     paddingBottom: '5px'
+})
+
+export const IconClass = style({
+    backgroundImage: 'var(--jp-icon-datascience)',
+    backgroundRepeat: 'no-repeat'
 })
