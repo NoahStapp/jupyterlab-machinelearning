@@ -4,6 +4,7 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 import { Kernel } from '@jupyterlab/services';
 // import VegaEmbed from 'vega-embed';
 // import * as vega from 'vega';
+// import { TopLevelSpec as Spec } from 'vega-lite';
 import * as React from 'react';
 
 const extension: JupyterLabPlugin<void> = {
@@ -99,9 +100,11 @@ class ModelViewPanel extends React.Component<
   }
 
   render() {
-    // let lossGraphSpec = {
+    // let lossGraphSpec: Spec = {
     //   $schema: 'https://vega.github.io/schema/vega-lite/v2.json',
-    //   data: {name: 'lossData'},
+    //   data: {
+    //     name: 'lossData'
+    //   },
     //   width: 400,
     //   mark: 'line',
     //   encoding: {
@@ -111,14 +114,15 @@ class ModelViewPanel extends React.Component<
     // };
     // if (this.state.lossData !== null) {
     //   VegaEmbed('#lossGraph', lossGraphSpec).then(res => {
-    //     res.view.change(
-    //       'lossData',
-    //       vega
-    //         .changeset()
-    //         .insert(this.state.lossData)
-    //         .remove(this.state.oldLossData)
-    //     )
-    //     .run();
+    //     res.view
+    //       .change(
+    //         'lossData',
+    //         vega
+    //           .changeset()
+    //           .insert(this.state.lossData)
+    //           .remove(this.state.oldLossData)
+    //       )
+    //       .run();
     //   });
     // }
 
