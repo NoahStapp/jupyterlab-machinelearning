@@ -108,6 +108,8 @@ interface ModelViewPanelState {
   currentProgress: number;
   modelAccuracy: number;
   modelLoss: number;
+  lossData: Object[];
+  oldLossData: Object[];
   done: boolean;
 }
 
@@ -121,6 +123,8 @@ class ModelViewPanel extends React.Component<
     currentProgress: 0,
     modelAccuracy: 0,
     modelLoss: 0,
+    lossData: null,
+    oldLossData: null,
     done: false
   };
 
@@ -133,9 +137,20 @@ class ModelViewPanel extends React.Component<
           totalProgress: Number(
             parseFloat(msg.content.data['overall'].toString()).toFixed(2)
           ),
+          modelLoss: Number(
+            parseFloat(msg.content.data['loss'].toString()).toFixed(2)
+          ),
+          modelAccuracy: Number(
+            parseFloat(msg.content.data['accuracy'].toString()).toFixed(2)
+          ),
           currentProgress: Number(
             parseFloat(msg.content.data['current'].toString()).toFixed(2)
-          )
+          ),
+          oldLossData: this.state.lossData,
+          lossData: msg.content.data['loss_data'],
+          done: Number(
+            parseFloat(msg.content.data['overall'].toString()).toFixed(2)
+          ) === 100,
         });
       };
       comm.onClose = msg => {
@@ -149,9 +164,9 @@ class ModelViewPanel extends React.Component<
 
     return (
       <ModelViewer 
-        modelAccuracy={0}
-        modelLoss={0}
-        done={true}
+        modelAccuracy={this.state.modelAccuracy}
+        modelLoss={this.state.modelLoss}
+        done={this.state.done}
         runTime={10000}
       />
     );

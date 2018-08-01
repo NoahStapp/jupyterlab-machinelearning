@@ -22,12 +22,15 @@ class TrainingInfoCallback(Callback):
 
     def __init__(self):
         self.total_losses = []
+        self.loss = 0
         self.total_accuracy = []
+        self.accuracy = 0
         self.sample_amount = None
         self.epochs = None
         self.total_progress = 0
         self.progress = 0
         self.mode = 0
+        self.loss_data = []
 
     """
         Get number of samples/steps per epoch and total number of epochs
@@ -57,6 +60,8 @@ class TrainingInfoCallback(Callback):
 
     def on_epoch_begin(self, epoch, logs={}):
         self.progress = 0
+        self.loss = 0
+        self.accuracy = 0
 
     """
         Update statistics and output both total and current epoch progress
@@ -69,28 +74,36 @@ class TrainingInfoCallback(Callback):
         else:
             self.progress += 1
             self.total_progress += 1
+        self.loss = logs.get("loss")
         self.total_losses.append(logs.get("loss"))
+        self.loss_data.append({
+            "samples": self.total_progress, 
+            "loss": self.loss
+            })
+        self.accuracy = logs.get("acc")
         self.total_accuracy.append(logs.get("acc"))
         self.display_progress()
 
     def display_progress(self):
         data = {
-            "overall": ((self.total_progress / (self.sample_amount * self.epochs)) * 100),
-            "current": ((self.progress / self.sample_amount) * 100)
+            "overall": (
+                (self.total_progress / (self.sample_amount * self.epochs)) * 100
+            ),
+            "current": (self.progress / self.sample_amount) * 100,
+            "loss": self.loss * 100,
+            "accuracy": self.accuracy * 100,
+            "loss_data": self.loss_data,
         }
-        my_comm = Comm(target_name='test', data=data)
+        my_comm = Comm(target_name="test", data=data)
         my_comm.send(data=data)
 
-    
     def display_statistics(self):
-        self.data = {
-            "Loss: " + str(sum(self.total_losses) / float(len(self.total_losses)))
+        data = {
+            "loss": (sum(self.total_losses) / float(len(self.total_losses))),
+            "accuracy": (sum(self.total_accuracy) / float(len(self.total_accuracy))),
         }
-        display(self)
-        self.data = {
-            "Accuracy: "
-            + str(sum(self.total_accuracy) / float(len(self.total_accuracy)))
-        }
+        my_comm = Comm(target_name="test", data=data)
+        my_comm.send(data=data)
 
     def on_msg(comm, msg):
         print(msg)

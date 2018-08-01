@@ -8,7 +8,7 @@
     "jupyterlab-extension"
   ],
   "license": "BSD-3-Clause",
-  "author": "Jenna Landy and Noah Stapp",
+  "author": "Jenna Landy, Noah Stapp, and Alena Mueller",
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
     "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
@@ -25,12 +25,14 @@
     "@jupyterlab/application": "^0.17.2",
     "@jupyterlab/mainmenu": "^0.6.2",
     "@jupyterlab/notebook": "^0.17.2",
-    "typestyle": "^2.0.1"
+    "vega": "^4.2.0",
+    "vega-embed": "^3.18.2",
+    "vega-lite": "^3.0.0-rc0"
   },
   "devDependencies": {
     "prettier": "^1.13.7",
     "rimraf": "^2.6.1",
-    "typescript": "^2.6.2"
+    "typescript": "^3.0"
   },
   "jupyterlab": {
     "extension": true
