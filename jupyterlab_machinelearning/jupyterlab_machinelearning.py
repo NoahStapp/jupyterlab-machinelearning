@@ -38,6 +38,7 @@ class TrainingInfoCallback(Callback):
         self.accuracy_data = {}
         self.total_runtime = 0
         self.starttime = time()
+        self.epoch_number = 1;
 
     """
         Get number of samples/steps per epoch and total number of epochs
@@ -69,6 +70,9 @@ class TrainingInfoCallback(Callback):
         self.loss = 0
         self.accuracy = 0
 
+    def on_epoch_end(self, epoch, logs={}):
+        self.epoch_number += 1
+
     """
         Update statistics and datasets
     """
@@ -86,9 +90,8 @@ class TrainingInfoCallback(Callback):
         self.accuracy = logs.get("acc")
         self.accuracy_data = {"samples": self.total_progress, "accuracy": self.accuracy}
         self.total_accuracy.append(logs.get("acc"))
-        self.display_progress()
         self.total_runtime = time() - self.starttime
-
+        self.display_progress()
     """
         Send statistics and datasets to frontend 
     """
@@ -103,6 +106,8 @@ class TrainingInfoCallback(Callback):
             "accuracy": self.accuracy,
             "lossData": self.loss_data,
             "accuracyData": self.accuracy_data,
+            "epochNumber": self.epoch_number,
+            "epochs": self.epochs
         }
         my_comm = Comm(target_name="batchData", data=data)
         my_comm.send(data=data)

@@ -109,6 +109,8 @@ interface ModelViewPanelState {
   accuracy: number;
   lossData: LossData[];
   accuracyData: AccuracyData[];
+  epochNumber: number;
+  epochs: number;
 }
 
 /**
@@ -141,7 +143,9 @@ class ModelViewPanel extends React.Component<
     loss: 0,
     accuracy: 0,
     lossData: [],
-    accuracyData: []
+    accuracyData: [],
+    epochNumber: 0,
+    epochs: 0
   };
 
   constructor(props: any) {
@@ -172,7 +176,13 @@ class ModelViewPanel extends React.Component<
           accuracyData: [
             ...prevState.accuracyData,
             msg.content.data['accuracyData']
-          ]
+          ],
+          epochNumber: Number(
+            parseInt(msg.content.data['epochNumber'].toString())
+          ),
+          epochs: Number(
+            parseInt(msg.content.data['epochs'].toString())
+          )
         }));
       };
     });
@@ -230,7 +240,7 @@ class ModelViewPanel extends React.Component<
     return (
       <div>
         <div>{'Total: ' + this.state.totalProgress + '%'}</div>
-        <div>{'Current: ' + this.state.currentProgress + '%'}</div>
+        <div>{'Current: ' + this.state.currentProgress + '% ' + this.state.epochNumber + '/' + this.state.epochs}</div>
         <div>{'Runtime: ' + this.getFormattedRuntime()}</div>
         <div>{'Loss: ' + this.state.loss}</div>
         <div>{'Accuracy: ' + this.state.accuracy}</div>
