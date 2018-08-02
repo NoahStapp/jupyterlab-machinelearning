@@ -1,5 +1,10 @@
 import * as React from 'react';
-import { GraphContainerStyle, LabelStyle, BigLabelStyle, GraphStyle } from '../componentStyle/GraphStyle'
+import {
+  GraphContainerStyle,
+  LabelStyle,
+  BigLabelStyle,
+  GraphStyle
+} from '../componentStyle/GraphStyle';
 
 export interface IGraphProps {
   statName: string;
@@ -10,7 +15,7 @@ export interface IGraphProps {
 
 export class Graph extends React.Component<IGraphProps, {}> {
   render() {
-    return(
+    return (
       <div className={GraphContainerStyle}>
           <div className={LabelStyle}>
             <div className={BigLabelStyle}>{'Model ' + this.props.statName + ': '}</div>
@@ -24,10 +29,16 @@ export class Graph extends React.Component<IGraphProps, {}> {
             </div>
             {!isNaN(this.props.stat) && <div>%</div>}
           </div>
-          <div className={GraphStyle}>
-            {this.props.graph}
+          <div className="current-avg">
+            {this.props.done ? 'Average ' : 'Current '}
           </div>
+          <div className="stat">
+            {Math.round(this.props.stat * 10000) / 100}
+          </div>
+          <div>{'%'}</div>
+        </div>
+        <div id={this.props.statName} className={GraphStyle} />
       </div>
-    )
+    );
   }
 }

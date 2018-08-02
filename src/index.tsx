@@ -1,14 +1,17 @@
 import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
-import { ICommandPalette, Toolbar, ToolbarButton } from '@jupyterlab/apputils';
+import { 
+  ICommandPalette,
+  ReactElementWidget,
+  Toolbar,
+  ToolbarButton 
+} from '@jupyterlab/apputils';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 import { Kernel } from '@jupyterlab/services';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { IconClass, WidgetStyle } from './componentStyle/ModelViewerStyle'
 import { ModelViewWidget } from './ModelViewWidget'
 import { StatusItemWidget } from './StatusItemWidget'
-// import VegaEmbed from 'vega-embed';
-// import * as vega from 'vega';
-// import { TopLevelSpec as Spec } from 'vega-lite';
+import VegaEmbed from 'vega-embed';
 import '../style/urls.css'
 
 /**
@@ -32,34 +35,6 @@ const extension: JupyterLabPlugin<void> = {
         tracker.currentWidget.context.session.kernel !== null
       );
     }
-
-    /** Vega-Lite spec for training loss graph */
-    // let lossGraphSpec: Spec = {
-    //   $schema: 'https://vega.github.io/schema/vega-lite/v2.json',
-    //   data: {
-    //     name: 'lossData'
-    //   },
-    //   width: 400,
-    //   mark: 'line',
-    //   encoding: {
-    //     x: { field: 'samples', type: 'quantitative' },
-    //     y: { field: 'loss', type: 'quantitative' }
-    //   }
-    // };
-
-    // /** Vega-Lite spec for training accuracy graph */
-    // let accuracyGraphSpec: Spec = {
-    //   $schema: 'https://vega.github.io/schema/vega-lite/v2.json',
-    //   data: {
-    //     name: 'accuracyData'
-    //   },
-    //   width: 400,
-    //   mark: 'line',
-    //   encoding: {
-    //     x: { field: 'samples', type: 'quantitative' },
-    //     y: { field: 'accuracy', type: 'quantitative' }
-    //   }
-    // };
 
     /** Add command to command registry */
     const command: string = 'machinelearning:open-new';
@@ -92,14 +67,17 @@ const extension: JupyterLabPlugin<void> = {
     function addButton() {
       let widget: NotebookPanel | null = tracker.currentWidget;
       if (widget) {
-        let button: ToolbarButton = Toolbar.createFromCommand(app.commands, command);
-        widget.toolbar.insertItem(9, app.commands.label(command), button)
+        let button: ToolbarButton = Toolbar.createFromCommand(
+          app.commands,
+          command
+        );
+        widget.toolbar.insertItem(9, app.commands.label(command), button);
       }
     }
 
     /** Refresh command, used to update isEnabled when kernel status is changed */
     function refreshNewCommand() {
-      app.commands.notifyCommandChanged(command)
+      app.commands.notifyCommandChanged(command);
     }
 
     /** Add status bar item **/
@@ -119,13 +97,14 @@ const extension: JupyterLabPlugin<void> = {
     /** 
      * Deals with updating isEnabled status of command 
      * as well as placing button when currentWidget is a notebook panel
-     * 
+     *
      * Code credit to @vidartf/jupyterlab-kernelspy
      * */
     let widget: NotebookPanel | null = tracker.currentWidget;
     if (widget) {
-      widget.context.session.kernelChanged.connect(refreshNewCommand)
+      widget.context.session.kernelChanged.connect(refreshNewCommand);
     }
+
     tracker.currentChanged.connect((tracker) => {
       console.log('current changed')
       addButton()
@@ -140,12 +119,9 @@ const extension: JupyterLabPlugin<void> = {
         widget.context.session.kernelChanged.connect(refreshNewCommand);
         widget.context.session.kernelChanged.connect(addStatus);
       }
-    })
-
+    });
   },
   autoStart: true
 };
-
-
 
 export default extension;

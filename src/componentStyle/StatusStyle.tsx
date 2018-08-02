@@ -1,6 +1,7 @@
-import { style } from 'typestyle'
+import { style } from 'typestyle';
 
 export const StatusStyle = style({
+
   height: '24px',
   display: 'flex',
   fontSize: 'var(--jp-content-font-size0)',
@@ -9,7 +10,7 @@ export const StatusStyle = style({
 
 export const ProgressContainerStyle = style({
   display: 'block'
-})
+});
 
 export const ProgessBarContainerStyle = style({
   display: 'flex',
@@ -21,9 +22,10 @@ export const ProgessBarContainerStyle = style({
       fontSize: '9px'
     }
   }
-})
+});
 
 export function ProgressBarStyle(stat: number) {
+
   if (stat < 100) {
     return (
       style({
@@ -71,20 +73,20 @@ export const AccuracyStyle = style({
   display: 'flex',
 
   $nest: {
-    '& .contain-first':{
+    '& .contain-first': {
       paddingRight: '15px'
     },
-    
+
     '& .contain': {
-      display: 'flex',
+      display: 'flex'
     },
 
     '& .stat': {
       width: '30px',
-      textAlign:'right'
+      textAlign: 'right'
     }
   }
-})
+});
 
 export const ButtonStyle = style({
   backgroundImage: 'var(--jp-icon-datascience)',
@@ -94,4 +96,4 @@ export const ButtonStyle = style({
   backgroundColor: '#757575',
   border: 'none',
   outline: 'none'
-})
+});
