@@ -32,36 +32,6 @@ const extension: JupyterLabPlugin<void> = {
       );
     }
 
-    /** Vega-Lite spec for training loss graph */
-    let lossGraphSpec = {
-      $schema: 'https://vega.github.io/schema/vega/v4.json',
-      data: {
-        name: 'lossData'
-      },
-      height: 300,
-      width: 300,
-      mark: 'line',
-      encoding: {
-        x: { field: 'samples', type: 'quantitative' },
-        y: { field: 'loss', type: 'quantitative' }
-      }
-    };
-
-    /** Vega-Lite spec for training accuracy graph */
-    let accuracyGraphSpec = {
-      $schema: 'https://vega.github.io/schema/vega/v4.json',
-      data: {
-        name: 'accuracyData'
-      },
-      height: 300,
-      width: 300,
-      mark: 'line',
-      encoding: {
-        x: { field: 'samples', type: 'quantitative' },
-        y: { field: 'accuracy', type: 'quantitative' }
-      }
-    };
-
     /** Add command to command registry */
     const command: string = 'machinelearning:open-new';
     app.commands.addCommand(command, {
@@ -72,11 +42,7 @@ const extension: JupyterLabPlugin<void> = {
         let kernel: Kernel.IKernel = tracker.currentWidget.context.session
           .kernel as Kernel.IKernel;
 
-        const widget = new ModelViewWidget(
-          kernel,
-          lossGraphSpec,
-          accuracyGraphSpec
-        );
+        const widget = new ModelViewWidget(kernel);
         widget.id = 'machinelearning';
         widget.addClass(WidgetStyle);
         widget.title.label = 'Machine Learning';
@@ -136,18 +102,8 @@ const extension: JupyterLabPlugin<void> = {
 
 /** Top Level: ReactElementWidget that passes the kernel down to a React Component */
 class ModelViewWidget extends ReactElementWidget {
-  constructor(
-    kernel: Kernel.IKernel,
-    lossGraphSpec: any,
-    accuracyGraphSpec: any
-  ) {
-    super(
-      <ModelViewPanel
-        kernel={kernel}
-        lossGraphSpec={lossGraphSpec}
-        accuracyGraphSpec={accuracyGraphSpec}
-      />
-    );
+  constructor(kernel: Kernel.IKernel) {
+    super(<ModelViewPanel kernel={kernel} />);
   }
 }
 
@@ -156,8 +112,6 @@ class ModelViewWidget extends ReactElementWidget {
  */
 interface ModelViewPanelProps {
   kernel: Kernel.IKernel;
-  lossGraphSpec: any;
-  accuracyGraphSpec: any;
 }
 
 /**
@@ -322,15 +276,7 @@ class ModelViewPanel extends React.Component<
     ) {
       console.log('Updating graph for epoch', this.state.epochNumber);
       VegaEmbed('#Loss', lossGraphSpec, options);
-      // .then(res => {
-      //   res.view.insert('lossData', this.state.lossData).run();
-      //   // console.log(res.view.data('lossData'));
-      // });
       VegaEmbed('#Accuracy', accuracyGraphSpec, options);
-      // .then(res => {
-      //   res.view.insert('accuracyData', this.state.accuracyData).run();
-      //   // console.log(res.view.data('accuracyData'));
-      // });
     }
 
     return (
