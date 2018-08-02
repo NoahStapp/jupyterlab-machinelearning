@@ -2,20 +2,16 @@ import * as React from 'react';
 import { ModelViewer } from './components/ModelViewer'
 import { ReactElementWidget} from '@jupyterlab/apputils'
 import { Kernel } from '@jupyterlab/services';
-
+import VegaEmbed from 'vega-embed';
 
 /** Top Level: ReactElementWidget that passes the kernel down to a React Component */
 export class ModelViewWidget extends ReactElementWidget {
     constructor(
-      kernel: Kernel.IKernel,
-      lossGraphSpec: any,
-      accuracyGraphSpec: any,
+      kernel: Kernel.IKernel
     ) {
       super(
         <ModelViewPanel
           kernel={kernel}
-          lossGraphSpec={lossGraphSpec}
-          accuracyGraphSpec={accuracyGraphSpec}
         />
       );
     }
@@ -26,8 +22,6 @@ export class ModelViewWidget extends ReactElementWidget {
    */
   interface ModelViewPanelProps {
     kernel: Kernel.IKernel;
-    lossGraphSpec: any;
-    accuracyGraphSpec: any;
   }
   
   /**
@@ -43,23 +37,25 @@ export class ModelViewWidget extends ReactElementWidget {
     accuracyData: AccuracyData[];
     epochNumber: number;
     epochs: number;
+    updateGraph: boolean;
   }
   
   /**
    * Interface for the training loss graph's data
    */
-  interface LossData {
+  interface LossData extends Array<Object> {
     samples: number;
     loss: number;
   }
-  
+
   /**
    * Interface for the training accuracy graph's data
    */
-  interface AccuracyData {
+  interface AccuracyData extends Array<Object> {
     samples: number;
     accuracy: number;
   }
+
   /** Second Level: React Component that stores the state for the entire extension */
   class ModelViewPanel extends React.Component<
     ModelViewPanelProps,
@@ -75,6 +71,7 @@ export class ModelViewWidget extends ReactElementWidget {
       accuracyData: [],
       epochNumber: 0,
       epochs: 0,
+      updateGraph: true
     };
   
     constructor(props: any) {
@@ -94,26 +91,15 @@ export class ModelViewWidget extends ReactElementWidget {
               2
             )
           ),
-          runTime: Number(
-            parseInt(msg.content.data['runTime'].toString())
-          ),
+          runTime: Number(parseInt(msg.content.data['runTime'].toString())),
           modelLoss: Number(
             parseFloat(msg.content.data['loss'].toString()).toFixed(4)
           ),
           modelAccuracy: Number(
             parseFloat(msg.content.data['accuracy'].toString()).toFixed(4)
           ),
-          lossData: [...prevState.lossData, msg.content.data['lossData']],
-          accuracyData: [
-            ...prevState.accuracyData,
-            msg.content.data['accuracyData']
-          ],
-          epochNumber: Number(
-            parseInt(msg.content.data['epochNumber'].toString())
-          ),
-          epochs: Number(
-            parseInt(msg.content.data['epochs'].toString())
-          )
+          epochs: Number(parseInt(msg.content.data['epochs'].toString())),
+          updateGraph: false
         }));
       };
       
@@ -121,7 +107,6 @@ export class ModelViewWidget extends ReactElementWidget {
       console.log(commTotal)
       commTotal.onMsg = msg => {
         // console.log(msg.content.data);
-        console.log(msg)
         this.setState({
           runTime: Number(
             parseFloat(msg.content.data['runTime'].toString()).toFixed(2)
@@ -132,6 +117,20 @@ export class ModelViewWidget extends ReactElementWidget {
           modelAccuracy: Number(
             parseFloat(msg.content.data['totalAccuracy'].toString()).toFixed(2)
           )
+        });
+      };
+
+      const commEpoch = this.props.kernel.connectToComm('epochData')
+      console.log(commEpoch)
+      commEpoch.onMsg = msg => {
+        // console.log(msg.content.data);
+        this.setState({
+          lossData: msg.content.data['lossData'],
+          accuracyData: msg.content.data['accuracyData'],
+          epochNumber: Number(
+            parseInt(msg.content.data['epochNumber'].toString())
+          ),
+          updateGraph: true
         });
       };
     }
@@ -145,33 +144,54 @@ export class ModelViewWidget extends ReactElementWidget {
     }
   
     render() { 
-      if(this.state.overallComplete > 99) {
-        console.log(this.state.overallComplete)
-      }
+      let options = {
+        defaultStyle: true,
+        actions: false
+      };
+      let lossGraphSpec: any = {
+        $schema: 'https://vega.github.io/schema/vega-lite/v4.json',
+        data: {
+          values: this.state.lossData
+        },
+        height: 300,
+        width: 300,
+        mark: {
+          type: 'line',
+          opacity: 0.25
+        },
+        encoding: {
+          x: { field: 'samples', type: 'quantitative' },
+          y: { field: 'loss', type: 'quantitative' }
+        }
+      };
   
+      /** Vega-Lite spec for training accuracy graph */
+      let accuracyGraphSpec: any = {
+        $schema: 'https://vega.github.io/schema/vega-lite/v4.json',
+        data: {
+          values: this.state.accuracyData
+        },
+        height: 300,
+        width: 300,
+        mark: {
+          type: 'line',
+          strokeWidth: '0.25'
+        },
+        encoding: {
+          x: { field: 'samples', type: 'quantitative' },
+          y: { field: 'accuracy', type: 'quantitative' }
+        }
+      };
       /** If there is loss and accuracy data, update their respective graphs */
-      // if (this.state.lossData !== null && this.state.accuracy !== null) {
-      //   VegaEmbed('#lossGraph', this.props.lossGraphSpec).then(res => {
-      //     res.view
-      //       .change(
-      //         'lossData',
-      //         vega
-      //           .changeset()
-      //           .insert(this.state.lossData[this.state.lossData.length - 1])
-      //       )
-      //       .run();
-      //   });
-      //   VegaEmbed('#accuracyGraph', this.props.accuracyGraphSpec).then(res => {
-      //     res.view
-      //       .change(
-      //         'accuracyData',
-      //         vega
-      //           .changeset()
-      //           .insert(this.state.accuracyData[this.state.accuracyData.length - 1])
-      //       )
-      //       .run();
-      //   });
-      // }
+      if (
+        this.state.updateGraph &&
+        this.state.accuracyData.length !== 0 &&
+        this.state.lossData.length !== 0
+      ) {
+        console.log('Updating graph for epoch', this.state.epochNumber);
+        VegaEmbed('#Loss', lossGraphSpec, options);
+        VegaEmbed('#Accuracy', accuracyGraphSpec, options);
+      }
   
       return (
         <ModelViewer 
