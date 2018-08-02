@@ -1,17 +1,18 @@
 import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
-import {
+import { 
   ICommandPalette,
   ReactElementWidget,
   Toolbar,
-  ToolbarButton
+  ToolbarButton 
 } from '@jupyterlab/apputils';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 import { Kernel } from '@jupyterlab/services';
-import { ModelViewer } from './components/ModelViewer';
-import { IconClass, WidgetStyle } from './componentStyle/ModelViewerStyle';
+import { IStatusBar } from '@jupyterlab/statusbar';
+import { IconClass, WidgetStyle } from './componentStyle/ModelViewerStyle'
+import { ModelViewWidget } from './ModelViewWidget'
+import { StatusItemWidget } from './StatusItemWidget'
 import VegaEmbed from 'vega-embed';
-import * as React from 'react';
-import '../style/urls.css';
+import '../style/urls.css'
 
 /**
  * An extension to further explore machine learning models
@@ -19,14 +20,17 @@ import '../style/urls.css';
  **/
 const extension: JupyterLabPlugin<void> = {
   id: '@jupyterlab/jupyterlab-machinelearning',
-  requires: [ICommandPalette, INotebookTracker],
+  requires: [ICommandPalette, INotebookTracker, IStatusBar],
   activate: (
     app: JupyterLab,
     palette: ICommandPalette,
-    tracker: INotebookTracker
+    tracker: INotebookTracker,
+    statusBar: IStatusBar
   ): void => {
+    console.log('test9')
+
     function hasKernel(): boolean {
-      return (
+        return (
         tracker.currentWidget !== null &&
         tracker.currentWidget.context.session.kernel !== null
       );
@@ -50,7 +54,7 @@ const extension: JupyterLabPlugin<void> = {
         widget.title.closable = true;
 
         if (!widget.isAttached) {
-          app.shell.addToMainArea(widget);
+          tracker.currentWidget.context.addSibling(widget, {mode: 'split-right'})
         }
         app.shell.activateById(widget.id);
       }
@@ -76,8 +80,22 @@ const extension: JupyterLabPlugin<void> = {
       app.commands.notifyCommandChanged(command);
     }
 
-    /**
-     * Deals with updating isEnabled status of command
+    /** Add status bar item **/
+    function addStatus() {
+      console.log('adding to status bar')
+
+      let currentWidget: NotebookPanel = tracker.currentWidget
+      //.context.session.kernel as Kernel.IKernel;
+
+      statusBar.registerStatusItem(
+        '@jupyterlab/machinelearning',
+        new StatusItemWidget(currentWidget, hasKernel(), null, null),
+        {align: 'middle'}
+      )
+    }
+
+    /** 
+     * Deals with updating isEnabled status of command 
      * as well as placing button when currentWidget is a notebook panel
      *
      * Code credit to @vidartf/jupyterlab-kernelspy
@@ -86,210 +104,24 @@ const extension: JupyterLabPlugin<void> = {
     if (widget) {
       widget.context.session.kernelChanged.connect(refreshNewCommand);
     }
-    tracker.currentChanged.connect(tracker => {
-      addButton();
+
+    tracker.currentChanged.connect((tracker) => {
+      console.log('current changed')
+      addButton()
       if (widget) {
-        widget.context.session.kernelChanged.disconnect(refreshNewCommand);
+        console.log('disconnecting')
+        widget.context.session.kernelChanged.disconnect(refreshNewCommand)
+        widget.context.session.kernelChanged.disconnect(addStatus)
       }
       widget = tracker.currentWidget;
       if (widget) {
+        console.log('connecting')
         widget.context.session.kernelChanged.connect(refreshNewCommand);
+        widget.context.session.kernelChanged.connect(addStatus);
       }
     });
   },
   autoStart: true
 };
-
-/** Top Level: ReactElementWidget that passes the kernel down to a React Component */
-class ModelViewWidget extends ReactElementWidget {
-  constructor(kernel: Kernel.IKernel) {
-    super(<ModelViewPanel kernel={kernel} />);
-  }
-}
-
-/**
- * Interface for the machine learning panel's React props
- */
-interface ModelViewPanelProps {
-  kernel: Kernel.IKernel;
-}
-
-/**
- * Interface for the machine learning panel's React state
- */
-interface ModelViewPanelState {
-  overallComplete: number;
-  epochComplete: number;
-  modelAccuracy: number;
-  modelLoss: number;
-  runTime: number;
-  lossData: LossData[];
-  accuracyData: AccuracyData[];
-  epochNumber: number;
-  epochs: number;
-  updateGraph: boolean;
-}
-
-/**
- * Interface for the training loss graph's data
- */
-interface LossData extends Array<Object> {
-  samples: number;
-  loss: number;
-}
-
-/**
- * Interface for the training accuracy graph's data
- */
-interface AccuracyData extends Array<Object> {
-  samples: number;
-  accuracy: number;
-}
-/** Second Level: React Component that stores the state for the entire extension */
-class ModelViewPanel extends React.Component<
-  ModelViewPanelProps,
-  ModelViewPanelState
-> {
-  state = {
-    overallComplete: 0,
-    epochComplete: 0,
-    modelAccuracy: 0,
-    modelLoss: 0,
-    runTime: 0,
-    lossData: new Array<LossData>(),
-    accuracyData: new Array<AccuracyData>(),
-    epochNumber: 0,
-    epochs: 0,
-    updateGraph: true
-  };
-
-  constructor(props: any) {
-    super(props);
-    /** Register a custom comm with the backend package */
-    this.props.kernel.registerCommTarget('batchData', (comm, msg) => {
-      comm.onMsg = msg => {
-        // console.log(msg.content.data);
-        this.setState(prevState => ({
-          overallComplete: Number(
-            parseFloat(msg.content.data['totalProgress'].toString()).toFixed(2)
-          ),
-          epochComplete: Number(
-            parseFloat(msg.content.data['currentProgress'].toString()).toFixed(
-              2
-            )
-          ),
-          runTime: Number(parseInt(msg.content.data['runTime'].toString())),
-          modelLoss: Number(
-            parseFloat(msg.content.data['loss'].toString()).toFixed(4)
-          ),
-          modelAccuracy: Number(
-            parseFloat(msg.content.data['accuracy'].toString()).toFixed(4)
-          ),
-          epochs: Number(parseInt(msg.content.data['epochs'].toString())),
-          updateGraph: false
-        }));
-      };
-    });
-    this.props.kernel.registerCommTarget('totalData', (comm, msg) => {
-      comm.onMsg = msg => {
-        // console.log(msg.content.data);
-        this.setState({
-          runTime: Number(
-            parseFloat(msg.content.data['runTime'].toString()).toFixed(2)
-          ),
-          modelLoss: Number(
-            parseFloat(msg.content.data['totalLoss'].toString()).toFixed(2)
-          ),
-          modelAccuracy: Number(
-            parseFloat(msg.content.data['totalAccuracy'].toString()).toFixed(2)
-          )
-        });
-      };
-    });
-    this.props.kernel.registerCommTarget('epochData', (comm, msg) => {
-      comm.onMsg = msg => {
-        // console.log(msg.content.data);
-        this.setState({
-          lossData: msg.content.data['lossData'],
-          accuracyData: msg.content.data['accuracyData'],
-          epochNumber: Number(
-            parseInt(msg.content.data['epochNumber'].toString())
-          ),
-          updateGraph: true
-        });
-      };
-    });
-  }
-
-  getFormattedRuntime() {
-    let hours = Math.floor(this.state.runTime / 3600);
-    let minutes = Math.floor((this.state.runTime - hours * 3600) / 60);
-    let seconds = Math.floor(this.state.runTime - hours * 3600 - minutes * 60);
-
-    return hours + ':' + minutes + ':' + seconds;
-  }
-
-  render() {
-    let options = {
-      defaultStyle: true,
-      actions: false
-    };
-    let lossGraphSpec: any = {
-      $schema: 'https://vega.github.io/schema/vega-lite/v4.json',
-      data: {
-        values: this.state.lossData
-      },
-      height: 300,
-      width: 300,
-      mark: {
-        type: 'line',
-        opacity: 0.25
-      },
-      encoding: {
-        x: { field: 'samples', type: 'quantitative' },
-        y: { field: 'loss', type: 'quantitative' }
-      }
-    };
-
-    /** Vega-Lite spec for training accuracy graph */
-    let accuracyGraphSpec: any = {
-      $schema: 'https://vega.github.io/schema/vega-lite/v4.json',
-      data: {
-        values: this.state.accuracyData
-      },
-      height: 300,
-      width: 300,
-      mark: {
-        type: 'line',
-        strokeWidth: '0.25'
-      },
-      encoding: {
-        x: { field: 'samples', type: 'quantitative' },
-        y: { field: 'accuracy', type: 'quantitative' }
-      }
-    };
-    /** If there is loss and accuracy data, update their respective graphs */
-    if (
-      this.state.updateGraph &&
-      this.state.accuracyData.length !== 0 &&
-      this.state.lossData.length !== 0
-    ) {
-      console.log('Updating graph for epoch', this.state.epochNumber);
-      VegaEmbed('#Loss', lossGraphSpec, options);
-      VegaEmbed('#Accuracy', accuracyGraphSpec, options);
-    }
-
-    return (
-      <ModelViewer
-        modelAccuracy={this.state.modelAccuracy}
-        modelLoss={this.state.modelLoss}
-        done={this.state.overallComplete === 1.0}
-        runTime={10000}
-        overallComplete={this.state.overallComplete}
-        epochComplete={this.state.epochComplete}
-      />
-    );
-  }
-}
 
 export default extension;

@@ -70,20 +70,26 @@ export class Accuracy extends React.Component<IAccuracyProps, {}> {
     super(props);
   }
 
-  render() {
-    return (
-      <div className={AccuracyStyle}>
-        <div className="contain contain-first">
-          <div className="stat">
-            {Math.round(this.props.modelAccuracy * 100)}
-          </div>
-          <div>{'% acc.'}</div>
-        </div>
-        <div className="contain">
-          <div className="stat">{Math.round(this.props.modelLoss * 100)}</div>
-          <div>{'% loss'}</div>
-        </div>
-      </div>
-    );
-  }
+    render() {
+        return(
+            <div className={AccuracyStyle}>
+                <div className='contain contain-first'>
+                    <div className='stat'>{
+                        !isNaN(this.props.modelAccuracy)
+                        ? Math.round(this.props.modelAccuracy*100)
+                        : 'NaN '
+                    }</div>                    
+                    {!isNaN(this.props.modelAccuracy) ? <div>% acc.</div> : <div> acc.</div>}
+                </div>
+                <div className='contain'>
+                    {!isNaN(this.props.modelLoss) &&
+                        <div className='stat'>{
+                            Math.round(this.props.modelLoss*100)
+                        }</div>
+                    }
+                    {!isNaN(this.props.modelLoss) ? <div>% loss</div> : <div>NaN loss</div>}
+                </div>
+            </div>
+        )
+    }
 }

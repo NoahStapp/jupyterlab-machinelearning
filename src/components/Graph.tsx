@@ -17,9 +17,17 @@ export class Graph extends React.Component<IGraphProps, {}> {
   render() {
     return (
       <div className={GraphContainerStyle}>
-        <div className={LabelStyle}>
-          <div className={BigLabelStyle}>
-            {'Model ' + this.props.statName + ': '}
+          <div className={LabelStyle}>
+            <div className={BigLabelStyle}>{'Model ' + this.props.statName + ': '}</div>
+            <div className='current-avg'>{(this.props.done ? 'Average ' : 'Current ')}</div>
+            <div className='stat'>
+              {
+                !isNaN(this.props.stat) 
+                ? Number(this.props.stat*100).toFixed(2)
+                : 'NaN'
+              }
+            </div>
+            {!isNaN(this.props.stat) && <div>%</div>}
           </div>
           <div className="current-avg">
             {this.props.done ? 'Average ' : 'Current '}
