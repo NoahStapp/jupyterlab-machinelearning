@@ -16,7 +16,8 @@ export interface IGraphProps {
 export class Graph extends React.Component<IGraphProps, {}> {
   render() {
     return (
-      <div className={GraphContainerStyle}>
+      <div>
+        <div className={GraphContainerStyle}>
           <div className={LabelStyle}>
             <div className={BigLabelStyle}>{'Model ' + this.props.statName + ': '}</div>
             <div className='current-avg'>{(this.props.done ? 'Average ' : 'Current ')}</div>

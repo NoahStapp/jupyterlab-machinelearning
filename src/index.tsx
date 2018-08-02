@@ -1,7 +1,6 @@
 import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 import { 
   ICommandPalette,
-  ReactElementWidget,
   Toolbar,
   ToolbarButton 
 } from '@jupyterlab/apputils';
@@ -11,7 +10,6 @@ import { IStatusBar } from '@jupyterlab/statusbar';
 import { IconClass, WidgetStyle } from './componentStyle/ModelViewerStyle'
 import { ModelViewWidget } from './ModelViewWidget'
 import { StatusItemWidget } from './StatusItemWidget'
-import VegaEmbed from 'vega-embed';
 import '../style/urls.css'
 
 /**
@@ -27,7 +25,7 @@ const extension: JupyterLabPlugin<void> = {
     tracker: INotebookTracker,
     statusBar: IStatusBar
   ): void => {
-    console.log('test9')
+    console.log('test0')
 
     function hasKernel(): boolean {
         return (

@@ -14,6 +14,7 @@ export interface IStatusProps {
   modelAccuracy: number;
   modelLoss: number;
   done: boolean;
+  epoch: number;
 }
 
 export class Status extends React.Component<IStatusProps, {}> {

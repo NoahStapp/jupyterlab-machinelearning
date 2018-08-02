@@ -59,7 +59,7 @@ export class ModelViewer extends React.Component<IModelViewerProps, {}> {
               <span>model based: 453</span>
             </div>
           </div> 
-        }
+        )}
       </div>
     );
   }
