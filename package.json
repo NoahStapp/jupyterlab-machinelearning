@@ -25,6 +25,7 @@
     "@jupyterlab/application": "^0.17.2",
     "@jupyterlab/mainmenu": "^0.6.2",
     "@jupyterlab/notebook": "^0.17.2",
+    "@jupyterlab/statusbar": "^0.2.0",
     "typestyle": "^2.0.1",
     "vega": "^4.2.0",
     "vega-embed": "^3.18.2",

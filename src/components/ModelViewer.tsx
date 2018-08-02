@@ -1,13 +1,14 @@
 import * as React from 'react'
 import { Graph } from './Graph'
-import { Status } from './Status'
+// import { Status } from './Status'
 import { ModelViewerStyle, GraphsStyle, StatStyle, StatsContainerStyle, RunTimeStyle } from '../componentStyle/ModelViewerStyle'
 
 export interface IModelViewerProps {
   modelAccuracy: number;
   modelLoss: number;
   done: boolean;
-  runTime: number;
+  epoch: number;
+  runTime: string;
   overallComplete: number;
   epochComplete: number;
 }
@@ -52,13 +53,6 @@ export class ModelViewer extends React.Component<IModelViewerProps, {}> {
             </div>
           </div> 
         }
-        <Status 
-          overallComplete={this.props.overallComplete}
-          epochComplete={this.props.epochComplete}
-          modelAccuracy={this.props.modelAccuracy}
-          modelLoss={this.props.modelLoss}
-          done={this.props.done}
-        />
       </div>
     )
   }

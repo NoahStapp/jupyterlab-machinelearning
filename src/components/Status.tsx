@@ -13,6 +13,7 @@ export interface IStatusProps {
     epochComplete: number;
     modelAccuracy: number;
     modelLoss:number;
+    epoch: number;
     done: boolean;
 }
 
@@ -30,7 +31,7 @@ export class Status extends React.Component<IStatusProps, {}> {
                         stat={this.props.overallComplete}
                     />
                     <ProgressBar
-                        statName={"Epoch"}
+                        statName={"Epoch " + this.props.epoch}
                         stat={this.props.epochComplete}
                     />
                 </div>
@@ -84,12 +85,20 @@ export class Accuracy extends React.Component<IAccuracyProps, {}> {
         return(
             <div className={AccuracyStyle}>
                 <div className='contain contain-first'>
-                    <div className='stat'>{Math.round(this.props.modelAccuracy*100)}</div>
-                    <div>{"% acc."}</div>
+                    <div className='stat'>{
+                        !isNaN(this.props.modelAccuracy)
+                        ? Math.round(this.props.modelAccuracy*100)
+                        : 'NaN '
+                    }</div>                    
+                    {!isNaN(this.props.modelAccuracy) ? <div>% acc.</div> : <div> acc.</div>}
                 </div>
                 <div className='contain'>
-                    <div className='stat'>{Math.round(this.props.modelLoss*100)}</div>
-                    <div>{"% loss"}</div>
+                    {!isNaN(this.props.modelLoss) &&
+                        <div className='stat'>{
+                            Math.round(this.props.modelLoss*100)
+                        }</div>
+                    }
+                    {!isNaN(this.props.modelLoss) ? <div>% loss</div> : <div>NaN loss</div>}
                 </div>
             </div>
         )
