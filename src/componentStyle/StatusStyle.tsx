@@ -1,13 +1,13 @@
-import { style } from 'typestyle'
+import { style } from 'typestyle';
 
 export const StatusStyle = style({
   height: '26px',
   display: 'contents'
-})
+});
 
 export const ProgressContainerStyle = style({
   display: 'block'
-})
+});
 
 export const ProgessBarContainerStyle = style({
   display: 'flex',
@@ -18,27 +18,25 @@ export const ProgessBarContainerStyle = style({
       width: '45px'
     }
   }
-})
+});
 
 export function ProgressBarStyle(stat: number) {
-  return (
-    style({
-      width: '40px',
-      backgroundColor: 'var(--jp-content-font-color0)',
-      borderRadius: '3px',
-      height: '6px',
-      marginTop: '4px',
+  return style({
+    width: '40px',
+    backgroundColor: 'var(--jp-content-font-color0)',
+    borderRadius: '3px',
+    height: '6px',
+    marginTop: '4px',
 
-      $nest: {
-        '& .progress': {
-          width:stat*0.4,
-          backgroundColor: 'var(--jp-brand-color2)',
-          height: '6px',
-          borderRadius: '3px 0px 0px 3px'
-        }
+    $nest: {
+      '& .progress': {
+        width: stat * 0.4,
+        backgroundColor: 'var(--jp-brand-color2)',
+        height: '6px',
+        borderRadius: '3px 0px 0px 3px'
       }
-    })
-  )
+    }
+  });
 }
 
 export const AccuracyStyle = style({
@@ -47,20 +45,20 @@ export const AccuracyStyle = style({
   display: 'flex',
 
   $nest: {
-    '& .contain-first':{
+    '& .contain-first': {
       paddingRight: '15px'
     },
-    
+
     '& .contain': {
-      display: 'flex',
+      display: 'flex'
     },
 
     '& .stat': {
       width: '30px',
-      textAlign:'right'
+      textAlign: 'right'
     }
   }
-})
+});
 
 export const ButtonStyle = style({
   backgroundImage: 'var(--jp-icon-datascience)',
@@ -69,4 +67,4 @@ export const ButtonStyle = style({
   backgroundPositionY: '4px',
   border: 'none',
   outline: 'none'
-})
+});

@@ -1,14 +1,17 @@
 import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
-import { ICommandPalette, ReactElementWidget, Toolbar, ToolbarButton } from '@jupyterlab/apputils';
+import {
+  ICommandPalette,
+  ReactElementWidget,
+  Toolbar,
+  ToolbarButton
+} from '@jupyterlab/apputils';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 import { Kernel } from '@jupyterlab/services';
-import { ModelViewer } from './components/ModelViewer'
-import { IconClass, WidgetStyle } from './componentStyle/ModelViewerStyle'
-// import VegaEmbed from 'vega-embed';
-// import * as vega from 'vega';
-// import { TopLevelSpec as Spec } from 'vega-lite';
+import { ModelViewer } from './components/ModelViewer';
+import { IconClass, WidgetStyle } from './componentStyle/ModelViewerStyle';
+import VegaEmbed from 'vega-embed';
 import * as React from 'react';
-import '../style/urls.css'
+import '../style/urls.css';
 
 /**
  * An extension to further explore machine learning models
@@ -29,35 +32,35 @@ const extension: JupyterLabPlugin<void> = {
       );
     }
 
-  
     /** Vega-Lite spec for training loss graph */
-    // let lossGraphSpec: Spec = {
-    //   $schema: 'https://vega.github.io/schema/vega-lite/v2.json',
-    //   data: {
-    //     name: 'lossData'
-    //   },
-    //   width: 400,
-    //   mark: 'line',
-    //   encoding: {
-    //     x: { field: 'samples', type: 'quantitative' },
-    //     y: { field: 'loss', type: 'quantitative' }
-    //   }
-    // };
+    let lossGraphSpec = {
+      $schema: 'https://vega.github.io/schema/vega/v4.json',
+      data: {
+        name: 'lossData'
+      },
+      height: 300,
+      width: 300,
+      mark: 'line',
+      encoding: {
+        x: { field: 'samples', type: 'quantitative' },
+        y: { field: 'loss', type: 'quantitative' }
+      }
+    };
 
-    // /** Vega-Lite spec for training accuracy graph */
-    // let accuracyGraphSpec: Spec = {
-    //   $schema: 'https://vega.github.io/schema/vega-lite/v2.json',
-    //   data: {
-    //     name: 'accuracyData'
-    //   },
-    //   width: 400,
-    //   mark: 'line',
-    //   encoding: {
-    //     x: { field: 'samples', type: 'quantitative' },
-    //     y: { field: 'accuracy', type: 'quantitative' }
-    //   }
-    // };
-
+    /** Vega-Lite spec for training accuracy graph */
+    let accuracyGraphSpec = {
+      $schema: 'https://vega.github.io/schema/vega/v4.json',
+      data: {
+        name: 'accuracyData'
+      },
+      height: 300,
+      width: 300,
+      mark: 'line',
+      encoding: {
+        x: { field: 'samples', type: 'quantitative' },
+        y: { field: 'accuracy', type: 'quantitative' }
+      }
+    };
 
     /** Add command to command registry */
     const command: string = 'machinelearning:open-new';
@@ -69,7 +72,11 @@ const extension: JupyterLabPlugin<void> = {
         let kernel: Kernel.IKernel = tracker.currentWidget.context.session
           .kernel as Kernel.IKernel;
 
-        const widget = new ModelViewWidget(kernel, null, null);
+        const widget = new ModelViewWidget(
+          kernel,
+          lossGraphSpec,
+          accuracyGraphSpec
+        );
         widget.id = 'machinelearning';
         widget.addClass(WidgetStyle);
         widget.title.label = 'Machine Learning';
@@ -90,37 +97,39 @@ const extension: JupyterLabPlugin<void> = {
     function addButton() {
       let widget: NotebookPanel | null = tracker.currentWidget;
       if (widget) {
-        let button: ToolbarButton = Toolbar.createFromCommand(app.commands, command);
-        widget.toolbar.insertItem(9, app.commands.label(command), button)
+        let button: ToolbarButton = Toolbar.createFromCommand(
+          app.commands,
+          command
+        );
+        widget.toolbar.insertItem(9, app.commands.label(command), button);
       }
     }
 
     /** Refresh command, used to update isEnabled when kernel status is changed */
     function refreshNewCommand() {
-      app.commands.notifyCommandChanged(command)
+      app.commands.notifyCommandChanged(command);
     }
 
-    /** 
-     * Deals with updating isEnabled status of command 
+    /**
+     * Deals with updating isEnabled status of command
      * as well as placing button when currentWidget is a notebook panel
-     * 
+     *
      * Code credit to @vidartf/jupyterlab-kernelspy
      * */
     let widget: NotebookPanel | null = tracker.currentWidget;
     if (widget) {
-      widget.context.session.kernelChanged.connect(refreshNewCommand)
+      widget.context.session.kernelChanged.connect(refreshNewCommand);
     }
-    tracker.currentChanged.connect((tracker) => {
-      addButton()
+    tracker.currentChanged.connect(tracker => {
+      addButton();
       if (widget) {
-        widget.context.session.kernelChanged.disconnect(refreshNewCommand)
+        widget.context.session.kernelChanged.disconnect(refreshNewCommand);
       }
       widget = tracker.currentWidget;
       if (widget) {
         widget.context.session.kernelChanged.connect(refreshNewCommand);
       }
-    })
-
+    });
   },
   autoStart: true
 };
@@ -164,12 +173,13 @@ interface ModelViewPanelState {
   accuracyData: AccuracyData[];
   epochNumber: number;
   epochs: number;
+  updateGraph: boolean;
 }
 
 /**
  * Interface for the training loss graph's data
  */
-interface LossData {
+interface LossData extends Array<Object> {
   samples: number;
   loss: number;
 }
@@ -177,7 +187,7 @@ interface LossData {
 /**
  * Interface for the training accuracy graph's data
  */
-interface AccuracyData {
+interface AccuracyData extends Array<Object> {
   samples: number;
   accuracy: number;
 }
@@ -192,10 +202,11 @@ class ModelViewPanel extends React.Component<
     modelAccuracy: 0,
     modelLoss: 0,
     runTime: 0,
-    lossData: [],
-    accuracyData: [],
+    lossData: new Array<LossData>(),
+    accuracyData: new Array<AccuracyData>(),
     epochNumber: 0,
     epochs: 0,
+    updateGraph: true
   };
 
   constructor(props: any) {
@@ -213,26 +224,15 @@ class ModelViewPanel extends React.Component<
               2
             )
           ),
-          runTime: Number(
-            parseInt(msg.content.data['runTime'].toString())
-          ),
+          runTime: Number(parseInt(msg.content.data['runTime'].toString())),
           modelLoss: Number(
             parseFloat(msg.content.data['loss'].toString()).toFixed(4)
           ),
           modelAccuracy: Number(
             parseFloat(msg.content.data['accuracy'].toString()).toFixed(4)
           ),
-          lossData: [...prevState.lossData, msg.content.data['lossData']],
-          accuracyData: [
-            ...prevState.accuracyData,
-            msg.content.data['accuracyData']
-          ],
-          epochNumber: Number(
-            parseInt(msg.content.data['epochNumber'].toString())
-          ),
-          epochs: Number(
-            parseInt(msg.content.data['epochs'].toString())
-          )
+          epochs: Number(parseInt(msg.content.data['epochs'].toString())),
+          updateGraph: false
         }));
       };
     });
@@ -252,6 +252,19 @@ class ModelViewPanel extends React.Component<
         });
       };
     });
+    this.props.kernel.registerCommTarget('epochData', (comm, msg) => {
+      comm.onMsg = msg => {
+        // console.log(msg.content.data);
+        this.setState({
+          lossData: msg.content.data['lossData'],
+          accuracyData: msg.content.data['accuracyData'],
+          epochNumber: Number(
+            parseInt(msg.content.data['epochNumber'].toString())
+          ),
+          updateGraph: true
+        });
+      };
+    });
   }
 
   getFormattedRuntime() {
@@ -263,37 +276,68 @@ class ModelViewPanel extends React.Component<
   }
 
   render() {
-    console.log('rendering model view panel with kernel:', this.props.kernel);
+    let options = {
+      defaultStyle: true,
+      actions: false
+    };
+    let lossGraphSpec: any = {
+      $schema: 'https://vega.github.io/schema/vega-lite/v4.json',
+      data: {
+        values: this.state.lossData
+      },
+      height: 300,
+      width: 300,
+      mark: {
+        type: 'line',
+        opacity: 0.25
+      },
+      encoding: {
+        x: { field: 'samples', type: 'quantitative' },
+        y: { field: 'loss', type: 'quantitative' }
+      }
+    };
 
+    /** Vega-Lite spec for training accuracy graph */
+    let accuracyGraphSpec: any = {
+      $schema: 'https://vega.github.io/schema/vega-lite/v4.json',
+      data: {
+        values: this.state.accuracyData
+      },
+      height: 300,
+      width: 300,
+      mark: {
+        type: 'line',
+        strokeWidth: '0.25'
+      },
+      encoding: {
+        x: { field: 'samples', type: 'quantitative' },
+        y: { field: 'accuracy', type: 'quantitative' }
+      }
+    };
     /** If there is loss and accuracy data, update their respective graphs */
-    // if (this.state.lossData !== null && this.state.accuracy !== null) {
-    //   VegaEmbed('#lossGraph', this.props.lossGraphSpec).then(res => {
-    //     res.view
-    //       .change(
-    //         'lossData',
-    //         vega
-    //           .changeset()
-    //           .insert(this.state.lossData[this.state.lossData.length - 1])
-    //       )
-    //       .run();
-    //   });
-    //   VegaEmbed('#accuracyGraph', this.props.accuracyGraphSpec).then(res => {
-    //     res.view
-    //       .change(
-    //         'accuracyData',
-    //         vega
-    //           .changeset()
-    //           .insert(this.state.accuracyData[this.state.accuracyData.length - 1])
-    //       )
-    //       .run();
-    //   });
-    // }
+    if (
+      this.state.updateGraph &&
+      this.state.accuracyData.length !== 0 &&
+      this.state.lossData.length !== 0
+    ) {
+      console.log('Updating graph for epoch', this.state.epochNumber);
+      VegaEmbed('#Loss', lossGraphSpec, options);
+      // .then(res => {
+      //   res.view.insert('lossData', this.state.lossData).run();
+      //   // console.log(res.view.data('lossData'));
+      // });
+      VegaEmbed('#Accuracy', accuracyGraphSpec, options);
+      // .then(res => {
+      //   res.view.insert('accuracyData', this.state.accuracyData).run();
+      //   // console.log(res.view.data('accuracyData'));
+      // });
+    }
 
     return (
-      <ModelViewer 
+      <ModelViewer
         modelAccuracy={this.state.modelAccuracy}
         modelLoss={this.state.modelLoss}
-        done={this.state.overallComplete === 1.00}
+        done={this.state.overallComplete === 1.0}
         runTime={10000}
         overallComplete={this.state.overallComplete}
         epochComplete={this.state.epochComplete}
