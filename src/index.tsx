@@ -25,10 +25,10 @@ const extension: JupyterLabPlugin<void> = {
     tracker: INotebookTracker,
     statusBar: IStatusBar
   ): void => {
-    console.log('test9')
+    console.log('test7')
 
     function hasKernel(): boolean {
-        return (
+      return (
         tracker.currentWidget !== null &&
         tracker.currentWidget.context.session.kernel !== null
       );
@@ -82,19 +82,22 @@ const extension: JupyterLabPlugin<void> = {
     function addStatus() {
       console.log('adding to status bar')
 
-      let currentWidget: NotebookPanel = tracker.currentWidget
-      //.context.session.kernel as Kernel.IKernel;
-
-      statusBar.registerStatusItem(
-        '@jupyterlab/machinelearning',
-        new StatusItemWidget(currentWidget, hasKernel(), null, null, app.commands),
-        {align: 'middle'}
-      )
+      try {
+        statusBar.registerStatusItem(
+          '@jupyterlab/machinelearning',
+          new StatusItemWidget(hasKernel(), null, null, app.commands, tracker),
+          {align: 'middle'}
+        )
+      }
+      catch(error) {
+        console.log('already registered', error)
+      }
     }
 
     /** 
-     * Deals with updating isEnabled status of command 
-     * as well as placing button when currentWidget is a notebook panel
+     * Deals with updating isEnabled status of command,
+     * placing button when currentWidget is a notebook panel,
+     * and linking status item to kernel
      *
      * Code credit to @vidartf/jupyterlab-kernelspy
      * */
