@@ -25,10 +25,11 @@
     "@jupyterlab/application": "^0.17.2",
     "@jupyterlab/mainmenu": "^0.6.2",
     "@jupyterlab/notebook": "^0.17.2",
+    "@jupyterlab/statusbar": "^0.2.0",
     "typestyle": "^2.0.1",
     "vega": "^4.2.0",
-    "vega-embed": "^3.18.2",
-    "vega-lite": "^3.0.0-rc0"
+    "vega-embed": "^3.15.0",
+    "vega-lite": "^2.6.0"
   },
   "devDependencies": {
     "prettier": "^1.13.7",

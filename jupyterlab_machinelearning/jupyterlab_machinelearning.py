@@ -34,11 +34,11 @@ class TrainingInfoCallback(Callback):
         self.total_progress = 0
         self.current_progress = 0
         self.mode = 0
-        self.loss_data = {}
-        self.accuracy_data = {}
+        self.loss_data = []
+        self.accuracy_data = []
         self.total_runtime = 0
         self.starttime = time()
-        self.epoch_number = 1;
+        self.epoch_number = 1
 
     """
         Get number of samples/steps per epoch and total number of epochs
@@ -54,6 +54,7 @@ class TrainingInfoCallback(Callback):
             self.mode = 1
 
         self.epochs = self.params["epochs"]
+
     """
         Output total loss and accuracy statistics
     """
@@ -71,6 +72,7 @@ class TrainingInfoCallback(Callback):
         self.accuracy = 0
 
     def on_epoch_end(self, epoch, logs={}):
+        self.update_graph()
         self.epoch_number += 1
 
     """
@@ -86,12 +88,15 @@ class TrainingInfoCallback(Callback):
             self.total_progress += 1
         self.loss = logs.get("loss")
         self.total_losses.append(logs.get("loss"))
-        self.loss_data = {"samples": self.total_progress, "loss": self.loss}
+        loss_item = {"samples": self.total_progress, "loss": self.loss}
+        self.loss_data.append(loss_item)
         self.accuracy = logs.get("acc")
-        self.accuracy_data = {"samples": self.total_progress, "accuracy": self.accuracy}
+        accuracy_item = {"samples": self.total_progress, "accuracy": self.accuracy}
+        self.accuracy_data.append(accuracy_item)
         self.total_accuracy.append(logs.get("acc"))
         self.total_runtime = time() - self.starttime
         self.display_progress()
+
     """
         Send statistics and datasets to frontend 
     """
@@ -104,10 +109,7 @@ class TrainingInfoCallback(Callback):
             "runTime": self.total_runtime,
             "loss": self.loss,
             "accuracy": self.accuracy,
-            "lossData": self.loss_data,
-            "accuracyData": self.accuracy_data,
-            "epochNumber": self.epoch_number,
-            "epochs": self.epochs
+            "epochs": self.epochs,
         }
         my_comm = Comm(target_name="batchData", data=data)
         my_comm.send(data=data)
@@ -125,6 +127,16 @@ class TrainingInfoCallback(Callback):
             ),
         }
         my_comm = Comm(target_name="totalData", data=data)
+        my_comm.send(data=data)
+
+    def update_graph(self):
+        data = {
+            "updateGraph": True,
+            "lossData": self.loss_data,
+            "accuracyData": self.accuracy_data,
+            "epochNumber": self.epoch_number,
+        }
+        my_comm = Comm(target_name="epochData", data=data)
         my_comm.send(data=data)
 
     def on_msg(comm, msg):

@@ -1,37 +1,37 @@
-import { style } from 'typestyle'
+import { style } from 'typestyle';
 
 export const GraphContainerStyle = style({
-    width: '50%',
-    paddingTop: '35px'
-})
+  paddingTop: '35px',
+  width: '50%',
+});
 
 export const LabelStyle = style({
-    display: 'flex',
-    width: '100%',
-    boxSizing: 'border-box',
-    paddingLeft: '10%',
+  width: '100%',
+  boxSizing: 'border-box',
+  paddingLeft: '10%',
 
-    $nest: {
-        '& .stat': {
-            width: '50px',
-            lineHeight: '20px',
-            textAlign: 'right'
-        },
+  $nest: {
+    '& .stat-label': {
+      display: 'flex'
+    },
 
-        '& .current-avg': {
-            lineHeight: '20px',
-            paddingLeft: '12px'
-        }
+    '& .stat': {
+      width: '50px',
+      lineHeight: '20px',
+      textAlign: 'right'
+    },
+
+    '& .final-avg': {
+      lineHeight: '20px',
     }
-})
+  }
+});
 
 export const BigLabelStyle = style({
-    fontSize: 'var(--jp-content-font-size2)'
-})
+  fontSize: 'var(--jp-content-font-size2)'
+});
 
 export const GraphStyle = style({
-    width: '80%',
-    margin: '15px 10%',
-    height: '400px',
-    backgroundColor: 'var(--jp-brand-color3)'
-})
+  width: '80%',
+  height: '400px',
+});
