@@ -67,52 +67,15 @@ export function ProgressBarStyle(stat: number) {
   }
 }
 
-export const AccuracyStyle = style({
-  lineHeight: '26px',
-  padding: '0 15px',
-  display: 'flex',
-
-  $nest: {
-    '& .contain-first': {
-      paddingRight: '15px'
-    },
-
-    '& .acc-loss': {
-      paddingLeft: '4px'
-    },
-
-    '& .contain': {
-      display: 'flex'
-    },
-
-    '& .stat': {
-      width: '30px',
-      textAlign: 'right'
-    },
-
-    '& .up': {
-      backgroundImage: 'var(--jp-icon-uparrow)',
-      backgroundRepeat: 'no-repeat',
-    },
-
-    '& .down': {
-      backgroundImage: 'var(--jp-icon-uparrow)',
-      backgroundRepeat: 'no-repeat',
-      backgroundPositionX: '-2px',
-      backgroundPositionY: '4px',
-      backgroundSize: '15px',
-      width: '16px',
-      transform: 'rotate(180deg)',
-    }
-  }
-});
-
 export const ButtonStyle = style({
   backgroundImage: 'var(--jp-icon-machinelearning)',
   backgroundRepeat: 'no-repeat',
-  backgroundSize: '16px',
-  backgroundPositionY: '4px',
+  backgroundSize: '100%',
   backgroundColor: '#757575',
+  width: '20px',
+  height: '20px',
   border: 'none',
-  outline: 'none'
+  outline: 'none',
+  marginLeft: '13.5px',
+  marginTop: '2px'
 });

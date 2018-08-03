@@ -101,6 +101,7 @@ const extension: JupyterLabPlugin<void> = {
     let widget: NotebookPanel | null = tracker.currentWidget;
     if (widget) {
       widget.context.session.kernelChanged.connect(refreshNewCommand);
+      widget.context.session.kernelChanged.connect(addStatus);
     }
 
     tracker.currentChanged.connect((tracker) => {
