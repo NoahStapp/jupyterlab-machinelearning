@@ -84,7 +84,6 @@ export class Accuracy extends React.Component<IAccuracyProps, {}> {
                         ? Math.round(this.props.modelAccuracy*100) + '%'
                         : 'NaN'
                     }</div>
-                    <div className={this.props.modelAccuracy > 0.5 ? 'up' : 'down'}></div>                    
                     {!isNaN(this.props.modelAccuracy) ? <div className = 'acc-loss'>acc.</div> : <div>acc.</div>}
                 </div>
                 <div className='contain'>

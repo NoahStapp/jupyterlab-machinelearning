@@ -58,5 +58,6 @@ export const RunTimeStyle = style({
 
 export const IconClass = style({
   backgroundImage: 'var(--jp-icon-machinelearning)',
-  backgroundRepeat: 'no-repeat'
+  backgroundRepeat: 'no-repeat',
+  backgroundSize: '14px'
 });

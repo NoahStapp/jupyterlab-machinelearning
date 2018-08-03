@@ -1,25 +1,26 @@
 import * as React from 'react';
 import { ReactElementWidget } from '@jupyterlab/apputils'
 import { Kernel, KernelMessage } from '@jupyterlab/services';
-import { NotebookPanel } from '@jupyterlab/notebook'
+import { NotebookPanel, INotebookTracker } from '@jupyterlab/notebook'
 import { CommandRegistry } from '@phosphor/commands';
 import { Status } from './components/Status'
 
 export class StatusItemWidget extends ReactElementWidget {
     constructor(
-      currentWidget: NotebookPanel | null,
       hasKernel: boolean,
       lossGraphSpec: any,
       accuracyGraphSpec: any,
-      commands: CommandRegistry
+      commands: CommandRegistry,
+      tracker: INotebookTracker
     ) {
       super(
         hasKernel 
         ? <StatusItem
-          kernel={currentWidget.context.session.kernel as Kernel.IKernel}
+          kernel={tracker.currentWidget.context.session.kernel as Kernel.IKernel}
           lossGraphSpec={lossGraphSpec}
           accuracyGraphSpec={accuracyGraphSpec}
           commands={commands}
+          tracker={tracker}
         />
         : <div></div>
       );
@@ -34,12 +35,14 @@ export class StatusItemWidget extends ReactElementWidget {
     lossGraphSpec: any;
     accuracyGraphSpec: any;
     commands: CommandRegistry;
+    tracker: INotebookTracker;
   }
   
   /**
    * Interface for the machine learning panel's React state
    */
   interface IStatusItemState {
+    kernel: Kernel.IKernel;
     overallComplete: number;
     epochComplete: number;
     modelAccuracy: number;
@@ -72,6 +75,7 @@ export class StatusItemWidget extends ReactElementWidget {
     IStatusItemState
   > {
     state = {
+      kernel: this.props.kernel,
       overallComplete: 0,
       epochComplete: 0,
       modelAccuracy: 0,
@@ -91,6 +95,24 @@ export class StatusItemWidget extends ReactElementWidget {
       /** Register a custom comm with the backend package */
       this.props.kernel.registerCommTarget('batchData', (comm, msg) => {})     
       this.props.kernel.registerCommTarget('totalData', (comm, msg) => {})   
+
+      this.props.tracker.currentChanged.connect((tracker) => {
+        let widget: NotebookPanel | null = tracker.currentWidget
+        if (widget) {
+          console.log('new widget. re-registering comm targets')
+
+          this.setState({
+            kernel: widget.session.kernel as Kernel.IKernel
+          },
+          () => {
+            this.state.kernel.iopubMessage.connect(this.onMessage, this)
+
+            this.state.kernel.registerCommTarget('batchData', (comm, msg) => {})     
+            this.state.kernel.registerCommTarget('totalData', (comm, msg) => {})
+          })
+        }
+      })
+
     }
 
     onMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {

@@ -90,20 +90,6 @@ export const AccuracyStyle = style({
       textAlign: 'right'
     },
 
-    '& .up': {
-      backgroundImage: 'var(--jp-icon-uparrow)',
-      backgroundRepeat: 'no-repeat',
-    },
-
-    '& .down': {
-      backgroundImage: 'var(--jp-icon-uparrow)',
-      backgroundRepeat: 'no-repeat',
-      backgroundPositionX: '-2px',
-      backgroundPositionY: '4px',
-      backgroundSize: '15px',
-      width: '16px',
-      transform: 'rotate(180deg)',
-    }
   }
 });
 
@@ -113,6 +99,7 @@ export const ButtonStyle = style({
   backgroundSize: '16px',
   backgroundPositionY: '4px',
   backgroundColor: '#757575',
+  width: '16px',
   border: 'none',
   outline: 'none'
 });
