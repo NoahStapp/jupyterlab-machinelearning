@@ -9,8 +9,8 @@ import {
 } from '../componentStyle/ModelViewerStyle';
 
 export interface IModelViewerProps {
-  modelAccuracy: number;
-  modelLoss: number;
+  spec: Object[];
+  dataSet: Object[];
   done: boolean;
   epoch: number;
   runTime: string;
@@ -28,18 +28,11 @@ export class ModelViewer extends React.Component<IModelViewerProps, {}> {
       <div className={ModelViewerStyle}>
         <div className="before" />
         <div className={GraphsStyle}>
-          <Graph
-            statName="Accuracy"
-            stat={this.props.modelAccuracy}
-            graph="placeholder for accuracy graph"
-            done={this.props.done}
-          />
-          <Graph
-            statName="Loss"
-            stat={this.props.modelLoss}
-            graph="placeholder for loss graph"
-            done={this.props.done}
-          />
+          {this.props.spec.map(spec => {
+            return (
+              <Graph key={spec['name']} graphName={spec['name']} done={this.props.done} />
+            )
+          })}
         </div>
         {this.props.done && (
           <div className={StatsContainerStyle}>
@@ -58,7 +51,7 @@ export class ModelViewer extends React.Component<IModelViewerProps, {}> {
               <span>model based: 53453</span>
               <span>model based: 453</span>
             </div>
-          </div> 
+          </div>
         )}
       </div>
     );
