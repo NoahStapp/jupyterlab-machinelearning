@@ -1,26 +1,28 @@
 import { style } from 'typestyle';
 
 export const GraphContainerStyle = style({
+  paddingTop: '35px',
   width: '50%',
-  paddingTop: '35px'
 });
 
 export const LabelStyle = style({
-  display: 'flex',
   width: '100%',
   boxSizing: 'border-box',
   paddingLeft: '10%',
 
   $nest: {
+    '& .stat-label': {
+      display: 'flex'
+    },
+
     '& .stat': {
       width: '50px',
       lineHeight: '20px',
       textAlign: 'right'
     },
 
-    '& .current-avg': {
+    '& .final-avg': {
       lineHeight: '20px',
-      paddingLeft: '12px'
     }
   }
 });
@@ -31,6 +33,5 @@ export const BigLabelStyle = style({
 
 export const GraphStyle = style({
   width: '80%',
-  margin: '15px 10%',
   height: '400px',
 });

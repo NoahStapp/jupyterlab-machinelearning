@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { CommandRegistry } from '@phosphor/commands';
 import {
   ProgressBarStyle,
   ButtonStyle,
@@ -15,6 +16,7 @@ export interface IStatusProps {
   modelLoss: number;
   done: boolean;
   epoch: number;
+  commands: CommandRegistry;
 }
 
 export class Status extends React.Component<IStatusProps, {}> {
@@ -27,13 +29,15 @@ export class Status extends React.Component<IStatusProps, {}> {
       <div className={StatusStyle}>
         <div className={ProgressContainerStyle}>
           <ProgressBar statName={'Overall'} stat={this.props.overallComplete} />
-          <ProgressBar statName={'Epoch'} stat={this.props.epochComplete} />
+          <ProgressBar statName={'Epoch ' + this.props.epoch} stat={this.props.epochComplete} />
         </div>
         <Accuracy
           modelAccuracy={this.props.modelAccuracy}
           modelLoss={this.props.modelLoss}
         />
-        <button className={ButtonStyle} />
+        <button className={ButtonStyle} 
+          onClick = {() => this.props.commands.execute('machinelearning:open-new')}
+        />
       </div>
     );
   }
@@ -77,18 +81,17 @@ export class Accuracy extends React.Component<IAccuracyProps, {}> {
                 <div className='contain contain-first'>
                     <div className='stat'>{
                         !isNaN(this.props.modelAccuracy)
-                        ? Math.round(this.props.modelAccuracy*100)
-                        : 'NaN '
-                    }</div>                    
-                    {!isNaN(this.props.modelAccuracy) ? <div>% acc.</div> : <div> acc.</div>}
+                        ? Math.round(this.props.modelAccuracy*100) + '%'
+                        : 'NaN'
+                    }</div>
+                    <div className={this.props.modelAccuracy > 0.5 ? 'up' : 'down'}></div>                    
+                    {!isNaN(this.props.modelAccuracy) ? <div className = 'acc-loss'>acc.</div> : <div>acc.</div>}
                 </div>
                 <div className='contain'>
-                    {!isNaN(this.props.modelLoss) &&
-                        <div className='stat'>{
-                            Math.round(this.props.modelLoss*100)
-                        }</div>
-                    }
-                    {!isNaN(this.props.modelLoss) ? <div>% loss</div> : <div>NaN loss</div>}
+                    <div className='stat'>
+                      {Number(this.props.modelLoss).toFixed(2)}
+                    </div>
+                    <div className='acc-loss'>loss</div>
                 </div>
             </div>
         )

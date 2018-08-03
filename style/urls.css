@@ -1,4 +1,5 @@
 :root {
     /** Icon credit to data science by Matt Wassner from the Noun Project **/
-    --jp-icon-datascience: url('icons/datascience.svg');
+    --jp-icon-machinelearning: url('icons/machinelearning-blue.svg');
+    --jp-icon-uparrow: url('icons/up.svg')
 }

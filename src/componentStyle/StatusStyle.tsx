@@ -77,6 +77,10 @@ export const AccuracyStyle = style({
       paddingRight: '15px'
     },
 
+    '& .acc-loss': {
+      paddingLeft: '4px'
+    },
+
     '& .contain': {
       display: 'flex'
     },
@@ -84,12 +88,27 @@ export const AccuracyStyle = style({
     '& .stat': {
       width: '30px',
       textAlign: 'right'
+    },
+
+    '& .up': {
+      backgroundImage: 'var(--jp-icon-uparrow)',
+      backgroundRepeat: 'no-repeat',
+    },
+
+    '& .down': {
+      backgroundImage: 'var(--jp-icon-uparrow)',
+      backgroundRepeat: 'no-repeat',
+      backgroundPositionX: '-2px',
+      backgroundPositionY: '4px',
+      backgroundSize: '15px',
+      width: '16px',
+      transform: 'rotate(180deg)',
     }
   }
 });
 
 export const ButtonStyle = style({
-  backgroundImage: 'var(--jp-icon-datascience)',
+  backgroundImage: 'var(--jp-icon-machinelearning)',
   backgroundRepeat: 'no-repeat',
   backgroundSize: '16px',
   backgroundPositionY: '4px',

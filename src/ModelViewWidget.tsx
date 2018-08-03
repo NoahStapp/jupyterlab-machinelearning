@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { ModelViewer } from './components/ModelViewer'
 import { ReactElementWidget} from '@jupyterlab/apputils'
-import { Kernel } from '@jupyterlab/services';
+import { Kernel, KernelMessage } from '@jupyterlab/services';
 import VegaEmbed from 'vega-embed';
 
 /** Top Level: ReactElementWidget that passes the kernel down to a React Component */
@@ -77,11 +77,14 @@ export class ModelViewWidget extends ReactElementWidget {
     constructor(props: any) {
       super(props);
       /** Connect to custom comm with the backend package */
-      const commBatch = this.props.kernel.connectToComm('batchData')
-      console.log(commBatch)
-      commBatch.onMsg = (msg): void => {
-        // console.log(msg.content.data);
-        console.log(msg)
+      this.props.kernel.iopubMessage.connect(this.onMessage, this)
+      
+      /** Register a custom comm with the backend package */
+      this.props.kernel.registerCommTarget('epochData', (comm, msg) => {})     
+    }
+  
+    onMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {
+      if (msg.content.target_name === 'batchData') {
         this.setState(prevState => ({
           overallComplete: Number(
             parseFloat(msg.content.data['totalProgress'].toString()).toFixed(2)
@@ -101,12 +104,7 @@ export class ModelViewWidget extends ReactElementWidget {
           epochs: Number(parseInt(msg.content.data['epochs'].toString())),
           updateGraph: false
         }));
-      };
-      
-      const commTotal = this.props.kernel.connectToComm('totalData')
-      console.log(commTotal)
-      commTotal.onMsg = msg => {
-        // console.log(msg.content.data);
+      } else if (msg.content.target_name === 'totalData') {
         this.setState({
           runTime: Number(
             parseFloat(msg.content.data['runTime'].toString()).toFixed(2)
@@ -118,12 +116,7 @@ export class ModelViewWidget extends ReactElementWidget {
             parseFloat(msg.content.data['totalAccuracy'].toString()).toFixed(2)
           )
         });
-      };
-
-      const commEpoch = this.props.kernel.connectToComm('epochData')
-      console.log(commEpoch)
-      commEpoch.onMsg = msg => {
-        // console.log(msg.content.data);
+      } else if (msg.content.target_name === 'epochData') {
         this.setState({
           lossData: msg.content.data['lossData'],
           accuracyData: msg.content.data['accuracyData'],
@@ -132,9 +125,9 @@ export class ModelViewWidget extends ReactElementWidget {
           ),
           updateGraph: true
         });
-      };
+      }
     }
-  
+
     getFormattedRuntime() {
       let hours = Math.floor(this.state.runTime / 3600);
       let minutes = Math.floor((this.state.runTime - hours * 3600) / 60);

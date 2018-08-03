@@ -1,7 +1,8 @@
 import { style } from 'typestyle';
 
 export const WidgetStyle = style({
-  backgroundColor: 'var(--jp-layout-color0)'
+  backgroundColor: 'var(--jp-layout-color0)',
+  overflowY: 'scroll'
 });
 
 export const ModelViewerStyle = style({
@@ -26,6 +27,7 @@ export const ModelViewerStyle = style({
 
 export const GraphsStyle = style({
   display: 'flex',
+  flexWrap: 'wrap',
   width: '100%'
 });
 
@@ -55,6 +57,6 @@ export const RunTimeStyle = style({
 });
 
 export const IconClass = style({
-  backgroundImage: 'var(--jp-icon-datascience)',
+  backgroundImage: 'var(--jp-icon-machinelearning)',
   backgroundRepeat: 'no-repeat'
 });
